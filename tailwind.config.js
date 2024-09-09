@@ -12,6 +12,7 @@ module.exports = {
         foreground: "var(--foreground)",
         darkPurple: '#22082b' /* #1f0f24 */,
         lightPurple: '#260033',
+        PurpleBG: '#330b41',
         darkOrange: '#e65c00',
         lightOrange: '#ff751a',
       },

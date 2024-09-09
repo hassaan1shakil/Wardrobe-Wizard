@@ -19,8 +19,8 @@ export default function HomePage() {
           </div> */}
 
           <div>
-            <Link href="/upload" className="bg-purple-600 font-bold text-white px-16 py-3 rounded-lg shadow-md hover:bg-purple-700 transition-colors">
-              Upload Images
+            <Link href="/wardrobe" className="bg-purple-600 font-bold text-white px-16 py-3 rounded-lg shadow-md hover:bg-purple-700 transition-colors">
+              My Wardrobe
             </Link>
 
           </div>
@@ -41,8 +41,8 @@ export default function HomePage() {
 
           <div>
       
-            <Link href="/generate" className="bg-purple-600 font-bold text-white px-16 py-3 rounded-lg shadow-md hover:bg-purple-700 transition-colors">
-              Generate Outfits
+            <Link href="/outfits" className="bg-purple-600 font-bold text-white px-16 py-3 rounded-lg shadow-md hover:bg-purple-700 transition-colors">
+              My Outfits
             </Link>
           </div>
 
