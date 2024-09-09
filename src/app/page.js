@@ -29,7 +29,7 @@ export default function LandingPage() {
 
         {/* Get Buttons */}
         <div>
-          <Link href="/signup" className="bg-darkOrange text-2xl font-bold text-white px-16 py-3 rounded-lg shadow-md hover:bg-lightOrange transition-colors">
+          <Link href="/register" className="bg-darkOrange text-2xl font-bold text-white px-16 py-3 rounded-lg shadow-md hover:bg-lightOrange transition-colors">
             Get Started!
           </Link>
         </div>

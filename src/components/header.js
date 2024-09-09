@@ -14,12 +14,12 @@ export default function Header(){
         </div>
         
         {/* Navigation Tabs */}
-        <div className="flex-grow flex items-center justify-center space-x-4">
-          <Link href="/" className="px-4 py-2 rounded-md hover:bg-gray-700">Home</Link>
-          <Link href="/about" className="px-4 py-2 rounded-md hover:bg-gray-700">Generate Outfits</Link>
-          <Link href="/services" className="px-4 py-2 rounded-md hover:bg-gray-700">Recommendations</Link>
-          <Link href="/blog" className="px-4 py-2 rounded-md hover:bg-gray-700">About</Link>
-          <Link href="/portfolio" className="px-4 py-2 rounded-md hover:bg-gray-700">Support</Link>
+        <div className="flex-grow flex items-end justify-center space-x-4 text-lg text-blue-100 font-bold">
+          <Link href="/" className="px-4 py-2 rounded-md">Home</Link>
+          <Link href="/about" className="px-4 py-2 rounded-md">Generate Outfits</Link>
+          <Link href="/services" className="px-4 py-2 rounded-md">Recommendations</Link>
+          <Link href="/blog" className="px-4 py-2 rounded-md">About</Link>
+          <Link href="/portfolio" className="px-4 py-2 rounded-md">Support</Link>
         </div>
         
         {/* Contact/Support Tab */}
