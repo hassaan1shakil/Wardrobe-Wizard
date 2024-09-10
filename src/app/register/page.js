@@ -12,7 +12,7 @@ export default function RegisterPage() {
 
             <HomeButton />
 
-            <div>
+            <div className="flex flex-col gap-4 justify-center items-center">
 
                 <Image
                     src="/images/text-logo2.png"

@@ -1,12 +1,12 @@
 'use client'
 
 // components/SavedOutfits.js
-export default function SavedOutfits({ savedOutfits, openModal }) {
+export default function OutfitsGallery({ savedObjects, openModal , text}) {
     return (
         <section className="saved-outfits">
-            <h2 className="text-white text-3xl mb-4">Saved Outfits</h2>
+            <h2 className="text-white text-3xl mb-4"> {text} </h2>
             <div className="flex space-x-12 overflow-x-scroll bg-PurpleBG p-6 rounded-lg shadow-lg">
-                {savedOutfits.map((outfit) => (
+                {savedObjects.map((outfit) => (
                     <div
                         key={outfit.id}
                         className="cursor-pointer"
