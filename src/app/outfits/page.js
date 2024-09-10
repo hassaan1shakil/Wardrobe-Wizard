@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import Header from '@/components/header';
 import OutfitsForm from '@/components/outfits-form';
-import SavedOutfits from '@/components/saved-outfits';
+import OutfitsGallery from '@/components/outfits-gallery';
 import OutfitsModal from '@/components/outfits-modal';
 
-export default function Outfits() {
+export default function OutfitsPage() {
     // Form state
     const [formData, setFormData] = useState({
         type: '',
@@ -14,7 +14,7 @@ export default function Outfits() {
         season: ''
     });
 
-    // Dummy saved outfits data
+    // Dummy saved outfits data //**send api call to retrieve data */
     const savedOutfits = [
         {
             id: 1,
@@ -92,10 +92,10 @@ export default function Outfits() {
 
             <div className='flex flex-col p-12 gap-16'>
 
-                <div className=''>
+                <div>
 
                     {/* Saved Outfits Section */}
-                    <SavedOutfits savedOutfits={savedOutfits} openModal={openModal} />
+                    <OutfitsGallery savedObjects={savedOutfits} openModal={openModal} text={"Saved Outfits"}/>
 
                     {/* Modal for displaying enlarged images */}
                     {showModal && (
