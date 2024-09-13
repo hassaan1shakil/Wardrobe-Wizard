@@ -5,6 +5,7 @@ import Header from '@/components/header';
 import OutfitsForm from '@/components/outfits-form';
 import OutfitsGallery from '@/components/outfits-gallery';
 import OutfitsModal from '@/components/outfits-modal';
+import OutfitPreview from '@/components/outfit-preview';
 
 export default function OutfitsPage() {
     // Form state
@@ -34,10 +35,20 @@ export default function OutfitsPage() {
         }
     ];
 
+    const OutfitPreviewResponse = {
+
+        img_top: '/images/final-wizard3.png',
+        img_bottom: '/images/wizard7.png',
+        img_footwear: '/images/wizard6.png',
+        img_accessory: '/images/wizard5.png'
+    }
+
     // Modal state
     const [showModal, setShowModal] = useState(false);
     const [selectedOutfit, setSelectedOutfit] = useState(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [isFormSubmitted, setFormSubmission] = useState(false);
+    const [apiResponse, setApiResponse] = useState(false);
 
     // Handle form change
     const handleChange = (e) => {
@@ -51,7 +62,10 @@ export default function OutfitsPage() {
     // Handle form submit
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Form data:', formData); // *** send api call here ***
+        console.log('Form data:', formData); // *** send api call here and update the data in OutfitPreview***
+        // if successful submit && returned data from api call is good, toggle a boolean so we can show the preview
+        setFormSubmission(true);
+        setApiResponse(true);   // setting this for testing only
     };
 
     // Handle outfit click to open modal
@@ -110,13 +124,19 @@ export default function OutfitsPage() {
 
                 </div>
 
-
                 {/* Form Section */}
                 <OutfitsForm
                     formData={formData}
                     handleChange={handleChange}
                     handleSubmit={handleSubmit}
                 />
+
+                {/* Outfits Preview */}
+                {isFormSubmitted && apiResponse && (
+                    <OutfitPreview
+                    previewImages={OutfitPreviewResponse}
+                    />
+                )}
 
             </div>
 
