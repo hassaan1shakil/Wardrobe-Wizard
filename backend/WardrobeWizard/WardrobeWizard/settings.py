@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "api.apps.ApiConfig",
+    "corsheaders"
 ]
 
 MIDDLEWARE = [
@@ -53,6 +54,13 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Your Next.js frontend
+    # "https://your-frontend-domain.com",  # Production domain
 ]
 
 ROOT_URLCONF = "WardrobeWizard.urls"
@@ -90,6 +98,7 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'api.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
