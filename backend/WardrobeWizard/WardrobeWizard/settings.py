@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "api.apps.ApiConfig",
-    "corsheaders"
+    "corsheaders",
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -62,6 +63,16 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Your Next.js frontend
     # "https://your-frontend-domain.com",  # Production domain
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ]
+}
 
 ROOT_URLCONF = "WardrobeWizard.urls"
 
