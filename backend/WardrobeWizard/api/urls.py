@@ -1,6 +1,6 @@
 
 from django.urls import path
-from api.views import UserSignupView, LoginView
+from api.views import UserSignupView, LoginView, DeleteUser
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView 
 
 urlpatterns = [
@@ -8,4 +8,5 @@ urlpatterns = [
     # path('login/', LoginView.as_view(), name='user_login'),   # Not using custom login view for now
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),   
+    path('delete', DeleteUser.as_view(), name='user_deletion')
 ]
