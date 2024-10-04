@@ -61,3 +61,17 @@ class LoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Password is required")
         
         return data
+    
+
+class DeleteUserSerializer(serializers.Serializer):
+    
+    username = serializers.CharField(required=True)
+    
+    def validate_username(self, value):
+        
+        if not CustomUser.objects.filter(username=value).exists():
+            
+            raise serializers.ValidationError("User Not Found")
+        
+        return value
+        

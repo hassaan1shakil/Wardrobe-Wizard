@@ -1,8 +1,10 @@
 from django.shortcuts import render
+from .models import CustomUser
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .serializers import UserSignupSerializer, LoginSerializer
+from .serializers import UserSignupSerializer, LoginSerializer, DeleteUserSerializer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # Create your views here.
@@ -48,3 +50,30 @@ class LoginView(generics.CreateAPIView):
             )
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#DELETE Request 
+class DeleteUser(generics.DestroyAPIView):
+    
+    serializer_class = DeleteUserSerializer
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def delete(self, request, *args, **kwargs):
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        validated_username = serializer.validated_data.get('username')
+        
+        # Ensuring that the user signed in is the same as the user to be deleted
+        if request.user.username != validated_username:
+            return Response({"error": "You can only delete your own account."}, status=status.HTTP_403_FORBIDDEN)
+            
+        user = CustomUser.objects.filter(username=validated_username)
+        
+        if user:
+            user.delete()
+            return Response({"message": "User Account Deleted Successfully"}, status=status.HTTP_200_OK)
+        
+        return Response({"error": "User Account Not Found"}, status=status.HTTP_404_NOT_FOUND)
