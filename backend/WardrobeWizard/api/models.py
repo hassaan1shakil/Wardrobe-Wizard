@@ -37,8 +37,8 @@ class ClothingArticle(models.Model):
     
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)        # if user is deleted, all clothing items will be deleted (which is not akin to real life)
     articleImage = models.ImageField(upload_to=get_custom_upload_path)
-    category = models.CharField(max_length=20)
-    tagsList = models.DecimalField(max_digits=10, decimal_places=2)### Change this*********************************
+    category = models.CharField(max_length=20, null=True)
+    tagsList = models.DecimalField(max_digits=10, decimal_places=2, null=True)### Change this*********************************
     
     
 class Post(models.Model):

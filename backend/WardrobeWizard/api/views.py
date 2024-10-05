@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import CustomUser
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .serializers import UserSignupSerializer, LoginSerializer, DeleteUserSerializer
+from .serializers import UserSignupSerializer, LoginSerializer, DeleteUserSerializer, AddArticleSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -52,7 +52,7 @@ class LoginView(generics.CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 #DELETE Request 
-class DeleteUser(generics.DestroyAPIView):
+class DeleteUserView(generics.DestroyAPIView):
     
     serializer_class = DeleteUserSerializer
     
@@ -77,3 +77,21 @@ class DeleteUser(generics.DestroyAPIView):
             return Response({"message": "User Account Deleted Successfully"}, status=status.HTTP_200_OK)
         
         return Response({"error": "User Account Not Found"}, status=status.HTTP_404_NOT_FOUND)
+
+#POST Request    
+class UploadArticleView(generics.CreateAPIView):
+    
+    serializer_class = AddArticleSerializer
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        articles_list = serializer.save()
+        
+        # Send message for each rejected image???
+        
+        return Response({"message": f'{len(articles_list)} Clothing Articles Added to Wardrobe'}, status=status.HTTP_201_CREATED)
