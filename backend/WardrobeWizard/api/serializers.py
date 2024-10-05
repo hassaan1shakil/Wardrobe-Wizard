@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import CustomUser
+from .models import CustomUser, ClothingArticle
 
 class UserSignupSerializer(serializers.ModelSerializer):
     
@@ -49,8 +49,6 @@ class LoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Invalid Credentials")
             
             data['user'] = user   # save authenticated user
-            
-            
         
         else:
             
@@ -74,4 +72,67 @@ class DeleteUserSerializer(serializers.Serializer):
             raise serializers.ValidationError("User Not Found")
         
         return value
+
+
+class AddArticleSerializer(serializers.ModelSerializer):
+    
+    images_list = serializers.ListField(child=serializers.ImageField(), allow_empty=False, required=True)
+    
+    class Meta:
         
+        model = ClothingArticle
+        fields = ['images_list']
+        
+    def create(self, validated_data):
+        
+        # Validation Checks
+        
+        request = self.context.get('request')
+        current_user = request.user     # Get current user from session which will be automatically authenticated
+        
+        images_list = validated_data.get('images_list')
+        
+        if not images_list:
+            raise serializers.ValidationError("At least one image is required.")
+        
+        for image in images_list:
+            
+            if not image:
+                raise serializers.ValidationError("Each image must be valid")
+            
+            # check the image format (probably only need png)
+            if image.content_type not in ['image/jpeg', 'image/png']:
+                raise serializers.ValidationError("Unsupported image format. Only JPEG and PNG are allowed.")
+            
+            # check image size (example: limit to 5MB)
+            if image.size > 5 * 1024 * 1024:
+                raise serializers.ValidationError("Image file too large. Maximum size is 5MB.")
+        
+        # Create Articles List
+        
+        articles_list = [
+            ClothingArticle(user=current_user, articleImage=img) for img in images_list
+        ]
+        
+        # Bulk Create Articles in Database (alt to individual .save())
+        
+        ClothingArticle.objects.bulk_create(articles_list)
+        
+        return articles_list
+
+# Format for Incoming POST Request -- Not Checking Duplicate Image Uploads
+
+#"images_list": [
+
+#     {
+#         "image": "file1.png" # would be an actual image file, not a path
+#     },
+
+#     {
+#         "image": "file2.png"
+#     },
+
+#     {
+#         "image": "file3.png" 
+#     }
+# ]
