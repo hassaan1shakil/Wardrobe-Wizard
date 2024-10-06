@@ -31,14 +31,24 @@ class CustomUser(AbstractUser):
     
     
 class ClothingArticle(models.Model):
-
-    def __str__(self):
-        return self.name
     
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)        # if user is deleted, all clothing items will be deleted (which is not akin to real life)
     articleImage = models.ImageField(upload_to=get_custom_upload_path)
     category = models.CharField(max_length=20, null=True)
     tagsList = models.DecimalField(max_digits=10, decimal_places=2, null=True)### Change this*********************************
+
+    def __str__(self):
+        return self.name
+    
+    def delete(self, *args, **kwargs):      # Overridden to ensure deletion of image files from storage
+        
+        # Delete the file from the file system
+        if self.articleImage:
+            if os.path.isfile(self.articleImage.path):
+                os.remove(self.articleImage.path)
+        
+        # Call the parent class delete() to actually delete the object
+        super().delete(*args, **kwargs)
     
     
 class Post(models.Model):

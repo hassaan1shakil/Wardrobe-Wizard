@@ -136,3 +136,28 @@ class AddArticleSerializer(serializers.ModelSerializer):
 #         "image": "file3.png" 
 #     }
 # ]
+
+
+class DeleteArticleSerializer(serializers.Serializer):
+    
+    # Any variable initialized in the serializer here is added to validated_data after successful validation so it can be accessed in the view
+    
+    id_list = serializers.ListField(child=serializers.IntegerField(), allow_empty=False, required=True)
+    
+    def validate_id_list(self, id_list):
+        
+        request = self.context.get('request')
+        current_user = request.user
+        
+        if not id_list:
+            raise serializers.ValidationError("Please choose an image to be deleted.")
+               
+        for id_item in id_list:
+            
+            try:
+                ClothingArticle.objects.get(id=id_item, user=current_user)
+                
+            except ClothingArticle.DoesNotExist:
+                raise serializers.ValidationError("Image Not Found")
+        
+        return id_list

@@ -1,8 +1,8 @@
 from django.shortcuts import render
-from .models import CustomUser
+from .models import CustomUser, ClothingArticle
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .serializers import UserSignupSerializer, LoginSerializer, DeleteUserSerializer, AddArticleSerializer
+from .serializers import UserSignupSerializer, LoginSerializer, DeleteUserSerializer, AddArticleSerializer, DeleteArticleSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -95,3 +95,29 @@ class UploadArticleView(generics.CreateAPIView):
         # Send message for each rejected image???
         
         return Response({"message": f'{len(articles_list)} Clothing Articles Added to Wardrobe'}, status=status.HTTP_201_CREATED)
+
+# DELETE Request
+class DeleteArticleView(generics.DestroyAPIView):
+    
+    serializer_class = DeleteArticleSerializer
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def delete(self, request, *args, **kwargs):
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        id_list = serializer.validated_data.get('id_list')
+        
+        # Deleting Articles (using Django lookup type -- very powerful)
+        # Bulk Delete does not call the .delete() method of model.
+        # Instead, it just executes a SQL query directly which may create loopholes.
+        
+        articles = ClothingArticle.objects.filter(id__in=id_list, user=request.user)
+        
+        for item in articles:
+            item.delete()
+        
+        return Response({"message": f'{len(id_list)} Clothing Articles Deleted Successfully'}, status=status.HTTP_200_OK)
