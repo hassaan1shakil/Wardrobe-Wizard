@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import CustomUser, ClothingArticle
+from .models import CustomUser, ClothingArticle, Post
 
 class UserSignupSerializer(serializers.ModelSerializer):
     
@@ -161,3 +161,51 @@ class DeleteArticleSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Image Not Found")
         
         return id_list
+    
+    
+class ArticleCategorySerializer(serializers.Serializer):
+    
+    category = serializers.CharField(required=True)
+    
+    def validate_category(self, value):
+        
+        category = value
+        possible_values = ["tops", "bottoms", "footwears", "accessories"]
+        
+        if category in possible_values:
+            return category
+        
+        else:
+            raise serializers.ValidationError("Invalid Category Provided")
+        
+    
+class ListArticleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        
+        model = ClothingArticle
+        fields = "__all__"
+        
+        
+class PostCategorySerializer(serializers.Serializer):
+    
+    category = serializers.CharField(required=True)
+    
+    def validate_category(self, value):
+        
+        category = value
+        possible_values = ["user", "feed"]
+        
+        if category in possible_values:
+            return category
+        
+        else:
+            raise serializers.ValidationError("Invalid Category Provided")
+        
+    
+class ListPostSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        
+        model = Post
+        fields = "__all__"  
