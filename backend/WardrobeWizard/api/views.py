@@ -17,6 +17,7 @@ from .serializers import (
     CreateCommentSerializer,
     PostIDSerializer,
     ListCommentSerializer,
+    DeleteCommentSerializer,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -274,6 +275,7 @@ class CreateCommentView(generics.CreateAPIView):
         
 # GET Request
 class ListCommentView(generics.ListAPIView):
+    
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     
@@ -291,3 +293,27 @@ class ListCommentView(generics.ListAPIView):
         comments_list = ListCommentSerializer(filtered_comments, many=True)
         
         return Response({"comments": comments_list.data}, status=status.HTTP_200_OK)
+    
+    
+class DeleteCommentView(generics.DestroyAPIView):
+    
+    serializer_class = DeleteCommentSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def delete(self, request, *args, **kwargs):
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        comment_id = serializer.data.get('comment_id')
+        
+        comment = Comment.objects.get(id=comment_id, user=request.user)
+        
+        if comment:
+            comment.delete()
+        
+        else:
+            return Response("Comment Not Found", status=status.HTTP_404_NOT_FOUND)
+    
+        return Response(f'Comment: {comment_id} Deleted Successfully', status=status.HTTP_200_OK)
