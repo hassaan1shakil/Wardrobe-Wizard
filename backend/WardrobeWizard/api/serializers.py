@@ -296,3 +296,20 @@ class ListCommentSerializer(serializers.ModelSerializer):
         
         model = Comment
         fields = "__all__"
+        
+
+class DeleteCommentSerializer(serializers.Serializer):
+    
+    comment_id = serializers.IntegerField(required=True)
+    
+    def validate_comment_id(self, data):
+        
+        comment_id = data
+        
+        try:
+            Comment.objects.get(id=comment_id)
+        
+        except Comment.DoesNotExist:
+            raise serializers.ValidationError("Comment Not Found")
+        
+        return comment_id
