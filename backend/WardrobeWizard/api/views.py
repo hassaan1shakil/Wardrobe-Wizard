@@ -10,6 +10,7 @@ from .serializers import (
     DeleteArticleSerializer,
     ArticleCategorySerializer,
     ListArticleSerializer,
+    CreatePostSerializer,
     PostCategorySerializer,
     ListPostSerializer,
 )
@@ -115,7 +116,7 @@ class UploadArticleView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
 
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data, context={'request': request})   # explicity passing request in the context
         serializer.is_valid(raise_exception=True)
         posts_list = serializer.save()
 
@@ -137,7 +138,7 @@ class DeleteArticleView(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
 
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data, context={'request': request})   # explicity passing request in the context
         serializer.is_valid(raise_exception=True)
 
         id_list = serializer.validated_data.get("id_list")
@@ -155,6 +156,26 @@ class DeleteArticleView(generics.DestroyAPIView):
             {"message": f"{len(id_list)} Clothing Articles Deleted Successfully"},
             status=status.HTTP_200_OK,
         )
+        
+# POST Request
+
+class CreatePostView(generics.CreateAPIView):
+    
+    serializer_class = CreatePostSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        
+        serializer = self.get_serializer(data=request.data, context={'request': request})   # explicity passing request in the context
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        post = serializer.data
+        
+        # image url is being sent back righ now in "post"
+        return Response({"message": "Post Created Successfully", "post": post}, status=status.HTTP_201_CREATED)
+    
 
 # GET Request - Using 2 Serializers (one for validating category & one for serializing Django Model to Native Datatypes)
 class ListArticleView(generics.ListAPIView):
@@ -201,3 +222,6 @@ class ListPostView(generics.ListAPIView):
         list_serializer = ListPostSerializer(posts_list, many=True)
         
         return Response(list_serializer.data)
+    
+    
+    # when adding or removing a like on a post, check if the like even exists or not
