@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import CustomUser, ClothingArticle, Post
+from .models import CustomUser, ClothingArticle, Post, Comment
 
 class UserSignupSerializer(serializers.ModelSerializer):
     
@@ -232,3 +232,42 @@ class ListPostSerializer(serializers.ModelSerializer):
         
         model = Post
         fields = "__all__"  # see if i need to send the likesList or just the likesCount
+        
+        
+class DeletePostSerializer(serializers.Serializer):
+    
+    post_id = serializers.IntegerField(required=True)
+    
+    def validate_post_id(self, value):
+        
+        post_id = value
+        request = self.context.get('request')
+        
+        try:
+            Post.objects.get(id=post_id, user=request.user)
+            
+        except Post.DoesNotExist:
+            raise serializers.ValidationError("Post Does Not Exist")
+        
+        return value
+    
+
+class CreateCommentSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        
+        model = Comment
+        fields = ['post', 'text']
+        
+    def create(self, validated_data):
+        
+        request = self.context.get('request')
+        
+        comment = Comment(
+            post = validated_data.get('post'),
+            user = request.user,
+            text = validated_data.get('text')
+        )
+        
+        comment.save()
+        return comment
