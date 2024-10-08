@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import CustomUser, ClothingArticle, Post
+from .models import CustomUser, ClothingArticle, Post, Comment
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .serializers import (
@@ -15,6 +15,8 @@ from .serializers import (
     ListPostSerializer,
     DeletePostSerializer,
     CreateCommentSerializer,
+    PostIDSerializer,
+    ListCommentSerializer,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -253,7 +255,7 @@ class DeletePostView(generics.DestroyAPIView):
         
         return Response({"message": f'Post Id: {validated_id} Deleted Successfully'}, status=status.HTTP_200_OK)
     
-    
+# POST Request   
 class CreateCommentView(generics.CreateAPIView):
     
     serializer_class = CreateCommentSerializer
@@ -270,4 +272,22 @@ class CreateCommentView(generics.CreateAPIView):
         
         return Response({"message": "Comment Created Successfully", "comment": comment}, status=status.HTTP_201_CREATED)
         
+# GET Request
+class ListCommentView(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
         
+        post_id_serializer = PostIDSerializer(data=request.data)
+        post_id_serializer.is_valid(raise_exception=True)
+        post_id = post_id_serializer.data.get('post_id')
+        
+        filtered_comments = Comment.objects.filter(post=post_id).order_by('-createdTime')
+        
+        if not filtered_comments:
+            return Response("No Comments", status=status.HTTP_404_NOT_FOUND)
+        
+        comments_list = ListCommentSerializer(filtered_comments, many=True)
+        
+        return Response({"comments": comments_list.data}, status=status.HTTP_200_OK)

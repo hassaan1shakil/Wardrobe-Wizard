@@ -271,3 +271,28 @@ class CreateCommentSerializer(serializers.ModelSerializer):
         
         comment.save()
         return comment
+    
+
+class PostIDSerializer(serializers.Serializer):
+    
+    post_id = serializers.IntegerField(required=True)
+    
+    def validate_post_id(self, data):
+        
+        post_id = data
+        
+        try:
+            Post.objects.get(id=post_id)
+        
+        except Post.DoesNotExist:
+            raise serializers.ValidationError("Post Not Found")
+        
+        return post_id
+    
+  
+class ListCommentSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        
+        model = Comment
+        fields = "__all__"
