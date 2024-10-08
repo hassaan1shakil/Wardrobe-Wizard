@@ -24,7 +24,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
         user.save()
         return user
         
-    def update(self, validated_data):
+    def update(self, validated_data): # Complete this!!!
         return 1
     
         
@@ -186,6 +186,29 @@ class ListArticleSerializer(serializers.ModelSerializer):
         model = ClothingArticle
         fields = "__all__"
         
+
+class CreatePostSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        
+        model = Post
+        fields = ['caption', 'postImage']
+        
+    def create(self, validated_data):
+        
+        request = self.context.get('request')
+        
+        post = Post(
+            user = request.user,
+            caption = validated_data.get('caption'),
+            postImage = validated_data.get('postImage'),
+            # likesList would just be empty initially
+            # createdTime should be added automatically
+        )
+        
+        post.save()
+        return post
+        
         
 class PostCategorySerializer(serializers.Serializer):
     
@@ -208,4 +231,4 @@ class ListPostSerializer(serializers.ModelSerializer):
     class Meta:
         
         model = Post
-        fields = "__all__"  
+        fields = "__all__"  # see if i need to send the likesList or just the likesCount

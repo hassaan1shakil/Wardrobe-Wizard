@@ -1,6 +1,7 @@
 import os
 import uuid
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 def get_custom_upload_path(instance, filename):
@@ -35,7 +36,8 @@ class ClothingArticle(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)        # if user is deleted, all clothing items will be deleted (which is not akin to real life)
     articleImage = models.ImageField(upload_to=get_custom_upload_path)
     category = models.CharField(max_length=20, null=True)
-    tagsList = models.DecimalField(max_digits=10, decimal_places=2, null=True)### Change this*********************************
+    ### This has been removed from the table. Chnage datatype this time
+    #tagsList = models.DecimalField(max_digits=10, decimal_places=2, null=True)
 
     def __str__(self):
         return self.name
@@ -59,7 +61,7 @@ class Post(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     caption = models.CharField(max_length=50)
     postImage = models.ImageField(upload_to=get_custom_upload_path)
-    likesList = models.DecimalField(max_digits=10, decimal_places=2)### Change this************************************
+    likes = ArrayField(models.IntegerField(), blank=True, default=list)
     createdTime = models.DateTimeField(auto_now_add=True)
     
 
