@@ -232,3 +232,21 @@ class ListPostSerializer(serializers.ModelSerializer):
         
         model = Post
         fields = "__all__"  # see if i need to send the likesList or just the likesCount
+        
+        
+class DeletePostSerializer(serializers.Serializer):
+    
+    post_id = serializers.IntegerField(required=True)
+    
+    def validate_post_id(self, value):
+        
+        post_id = value
+        request = self.context.get('request')
+        
+        try:
+            Post.objects.get(id=post_id, user=request.user)
+            
+        except Post.DoesNotExist:
+            raise serializers.ValidationError("Post Does Not Exist")
+        
+        return value

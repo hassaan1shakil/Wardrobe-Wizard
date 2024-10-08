@@ -13,6 +13,7 @@ from .serializers import (
     CreatePostSerializer,
     PostCategorySerializer,
     ListPostSerializer,
+    DeletePostSerializer,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -158,7 +159,6 @@ class DeleteArticleView(generics.DestroyAPIView):
         )
         
 # POST Request
-
 class CreatePostView(generics.CreateAPIView):
     
     serializer_class = CreatePostSerializer
@@ -225,3 +225,29 @@ class ListPostView(generics.ListAPIView):
     
     
     # when adding or removing a like on a post, check if the like even exists or not
+    
+# DELETE Request
+class DeletePostView(generics.DestroyAPIView):
+    
+    serializer_class = DeletePostSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def delete(self, request, *args, **kwargs):
+        
+        serializer = self.get_serializer(data=request.data, context={'request': request})   # explicity passing request in the context
+        serializer.is_valid(raise_exception=True)
+        
+        validated_id = serializer.validated_data.get('post_id')
+        
+        post = Post.objects.get(id=validated_id, user=request.user)
+        
+        if post:
+            post.delete()
+            
+        else:
+            return Response(
+                {"error": "Post Not Found"}, status=status.HTTP_404_NOT_FOUND
+            )
+        
+        return Response({"message": f'Post Id: {validated_id} Deleted Successfully'}, status=status.HTTP_200_OK)
