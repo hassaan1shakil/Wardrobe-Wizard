@@ -14,6 +14,7 @@ from .serializers import (
     PostCategorySerializer,
     ListPostSerializer,
     DeletePostSerializer,
+    CreateCommentSerializer,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -251,3 +252,22 @@ class DeletePostView(generics.DestroyAPIView):
             )
         
         return Response({"message": f'Post Id: {validated_id} Deleted Successfully'}, status=status.HTTP_200_OK)
+    
+    
+class CreateCommentView(generics.CreateAPIView):
+    
+    serializer_class = CreateCommentSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def create(self, request, *args, **kwargs):
+        
+        serializer = self.get_serializer(data=request.data, context={'request': request})   # explicity passing request in the context
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        comment = serializer.data
+        
+        return Response({"message": "Comment Created Successfully", "comment": comment}, status=status.HTTP_201_CREATED)
+        
+        

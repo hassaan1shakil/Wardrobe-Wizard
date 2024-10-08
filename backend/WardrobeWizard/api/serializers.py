@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import CustomUser, ClothingArticle, Post
+from .models import CustomUser, ClothingArticle, Post, Comment
 
 class UserSignupSerializer(serializers.ModelSerializer):
     
@@ -250,3 +250,24 @@ class DeletePostSerializer(serializers.Serializer):
             raise serializers.ValidationError("Post Does Not Exist")
         
         return value
+    
+
+class CreateCommentSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        
+        model = Comment
+        fields = ['post', 'text']
+        
+    def create(self, validated_data):
+        
+        request = self.context.get('request')
+        
+        comment = Comment(
+            post = validated_data.get('post'),
+            user = request.user,
+            text = validated_data.get('text')
+        )
+        
+        comment.save()
+        return comment
