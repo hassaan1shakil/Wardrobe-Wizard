@@ -24,11 +24,28 @@ def get_custom_upload_path(instance, filename):
 
 class CustomUser(AbstractUser):
     
+    email = models.EmailField(max_length=254, unique=True)
+    profile_image = models.ImageField(upload_to=get_custom_upload_path, null=True)
+    
     def __str__(self):
         return self.name
     
-    email = models.EmailField(max_length=254, unique=True)
-    profile_image = models.ImageField(upload_to=get_custom_upload_path, null=True)
+    def save(self, *args, **kwargs):      # Overridden to ensure deletion of old profile image from storage
+        
+        # Check if user already exists
+        
+        if self.pk:
+            
+            old_image = CustomUser.objects.get(pk=self.pk).profile_image
+            
+            # Delete the file from the file system
+            
+            if old_image and old_image != self.profile_image:
+                if os.path.isfile(old_image.path):
+                    os.remove(old_image.path)
+            
+        # Call the parent class save() to actually update the user object
+        super().save(*args, **kwargs)
     
     
 class ClothingArticle(models.Model):

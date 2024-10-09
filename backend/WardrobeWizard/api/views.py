@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from .serializers import (
     UserSignupSerializer,
     LoginSerializer,
+    UpdateUserInfoSerializer,
     DeleteUserSerializer,
     AddArticleSerializer,
     DeleteArticleSerializer,
@@ -74,6 +75,21 @@ class LoginView(generics.CreateAPIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+# PUT Request
+class UpdateUserInforView(APIView):
+    
+    serializer_class = UpdateUserInfoSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def put(self, request, *args, **kwargs):
+        
+        serializer = self.serializer_class(request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({"message": "User Info Updated Successfully"}, status=status.HTTP_200_OK)
 
 
 # DELETE Request - Verify Deletion of User Data on Account Deletion
