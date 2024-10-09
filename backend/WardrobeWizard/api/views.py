@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from rest_framework.views import APIView
 from .models import CustomUser, ClothingArticle, Post, Comment
 from rest_framework import generics, status
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from .serializers import (
     UserSignupSerializer,
     LoginSerializer,
@@ -227,9 +228,6 @@ class ListPostView(generics.ListAPIView):
         
         return Response(list_serializer.data)
     
-    
-    # when adding or removing a like on a post, check if the like even exists or not
-    
 # DELETE Request
 class DeletePostView(generics.DestroyAPIView):
     
@@ -317,3 +315,33 @@ class DeleteCommentView(generics.DestroyAPIView):
             return Response("Comment Not Found", status=status.HTTP_404_NOT_FOUND)
     
         return Response(f'Comment: {comment_id} Deleted Successfully', status=status.HTTP_200_OK)
+    
+#POST Request    
+class TogglePostLikesView(APIView):
+    
+    serializer_class = PostIDSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        post_id = serializer.validated_data.get('post_id')
+        
+        current_post = get_object_or_404(Post, id=post_id)
+        current_user = request.user        
+        
+        # Unlike Post
+        
+        if current_post.likes.filter(id=current_user.id).exists():
+            current_post.likes.remove(current_user)
+            return Response({"message": f'Post: {post_id} Unliked by User: {current_user.id} successfully'}, status=status.HTTP_200_OK)
+        
+        # Like Post
+        
+        current_post.likes.add(current_user)
+        return Response({"message": f'Post: {post_id} liked by User: {current_user.id} successfully'}, status=status.HTTP_200_OK)
+
+    
