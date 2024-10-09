@@ -59,7 +59,16 @@ class LoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Password is required")
         
         return data
-    
+ 
+ 
+class UpdateUserInfoSerializer(serializers.ModelSerializer):
+     
+    class Meta: 
+        
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'profile_image']      # how to securely change and hash password???
+                                                                    # ensure deletion of old profile_image
+        
 
 class DeleteUserSerializer(serializers.Serializer):
     
