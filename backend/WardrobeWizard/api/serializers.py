@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 from .models import CustomUser, ClothingArticle, Post, Comment
 
 class UserSignupSerializer(serializers.ModelSerializer):
@@ -9,6 +10,8 @@ class UserSignupSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['username', 'first_name', 'last_name', 'email', 'password', 'profile_image']
         extra_kwargs = {'password': {'write_only': True}}   # Password should not be readable
+        
+    # Add Password Validation Mehthod
         
     def create(self, validated_data):
         
@@ -67,7 +70,33 @@ class UpdateUserInfoSerializer(serializers.ModelSerializer):
         
         model = CustomUser
         fields = ['first_name', 'last_name', 'profile_image']      # how to securely change and hash password???
-                                                                    # ensure deletion of old profile_image
+        
+
+class UpdatePasswordSerializer(serializers.ModelSerializer):
+    
+    old_password = serializers.CharField(required=True, write_only=True)
+    new_password = serializers.CharField(required=True, write_only=True)
+    
+    class Meta:
+        
+        model = CustomUser
+        fields = ['old_password', 'new_password']
+        
+    def validate_new_password(self, value):
+        
+        current_user = self.context.get('request').user
+        validate_password(password=value, user=current_user)
+        return value
+        
+    def update(self, instance, validated_data):
+        
+        if not instance.check_password(validated_data['old_password']):
+            raise serializers.ValidationError("Old Passowrd is Invalid")
+        
+        instance.set_password(validated_data['new_password'])
+        instance.save()
+        
+        return instance
         
 
 class DeleteUserSerializer(serializers.Serializer):

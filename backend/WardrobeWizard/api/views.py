@@ -7,6 +7,7 @@ from .serializers import (
     UserSignupSerializer,
     LoginSerializer,
     UpdateUserInfoSerializer,
+    UpdatePasswordSerializer,
     DeleteUserSerializer,
     AddArticleSerializer,
     DeleteArticleSerializer,
@@ -90,6 +91,21 @@ class UpdateUserInforView(APIView):
         serializer.save()
 
         return Response({"message": "User Info Updated Successfully"}, status=status.HTTP_200_OK)
+    
+# PUT Request
+class UpdatePasswordView(APIView):
+    
+    serializer_class = UpdatePasswordSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def put(self, request, *args, **kwargs):
+        
+        serializer = self.serializer_class(request.user, data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response({"message": "User Passowrd Updated Successfully"}, status=status.HTTP_200_OK)
 
 
 # DELETE Request - Verify Deletion of User Data on Account Deletion
