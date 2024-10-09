@@ -61,7 +61,7 @@ class Post(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     caption = models.CharField(max_length=50)
     postImage = models.ImageField(upload_to=get_custom_upload_path)
-    likes = ArrayField(models.IntegerField(), blank=True, default=list) # Make One-to-Many Relation
+    likes = models.ManyToManyField(CustomUser, related_name='liked_posts', blank=True)
     createdTime = models.DateTimeField(auto_now_add=True)
     
 
