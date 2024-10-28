@@ -1,10 +1,14 @@
+'use client'
+
 import { useState } from "react";
+import {useRouter} from 'next/navigation'
 
 export default function Login() {
-    // Manage state for email, password, and error message
-    const [email, setEmail] = useState("");
+    // Manage state for username, password, and error message
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    const router = useRouter()
 
     // Handle form submission
     const handleSubmit = async (e) => {
@@ -15,12 +19,12 @@ export default function Login() {
 
         try {
             // Perform login logic, making a POST request to your API route
-            const response = await fetch("/api/login", {
+            const response = await fetch("http://127.0.0.1:8000/api/login/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email, password }), // Send email and password as JSON
+                body: JSON.stringify({ username, password }), // Send username and password as JSON
             });
 
             const result = await response.json();
@@ -28,6 +32,7 @@ export default function Login() {
             if (response.ok) {
                 // Handle successful login (e.g., redirect to dashboard)
                 alert("Login successful!");
+                router.push('/home')
             } else {
                 // Handle login failure, show error message
                 setErrorMessage(result.message || "Invalid credentials. Please try again.");
@@ -44,20 +49,20 @@ export default function Login() {
                 className="flex flex-col gap-5 w-full max-w-md mx-auto bg-[#330b41] p-6 rounded-lg shadow-lg"
                 onSubmit={handleSubmit}
             >
-                {/* Email input field */}
+                {/* Username input field */}
                 <div className="flex flex-col">
-                    <label htmlFor="email" className="mb-2 text-gray-300">
-                        Email
+                    <label htmlFor="username" className="mb-2 text-gray-300">
+                        Username
                     </label>
                     <input
-                        type="email"
-                        id="email"
-                        name="email"
+                        type="username"
+                        id="username"
+                        name="username"
                         className="w-full p-3 rounded-lg bg-gray-100 border border-gray-600 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="email@domain.com"
+                        placeholder="username"
                         required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)} // Update email state
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)} // Update username state
                     />
                 </div>
 
