@@ -1,14 +1,21 @@
+'use client'
+
 import { useState } from "react";
+import { useRouter } from 'next/navigation'
 
 export default function Register() {
     // Manage form state
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
+    const [first_name, setFirstName] = useState("");
+    const [last_name, setLastName] = useState("");
+    const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [profile_image, setProfileImage] = useState("");
+    // setProfileImage(null)    // Default State
     const [terms, setTerms] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const router = useRouter()
 
     // Handle form submission
     const handleSubmit = async (e) => {
@@ -18,7 +25,7 @@ export default function Register() {
         setErrorMessage("");
 
         // Front-end validation to ensure all fields are filled in
-        if (!firstName || !lastName || !email || !password || !confirmPassword || !terms) {
+        if (!first_name || !last_name || !email || !username || !password || !confirmPassword || !terms) {
             setErrorMessage("All fields are required.");
             return;
         }
@@ -29,14 +36,21 @@ export default function Register() {
             return;
         }
 
+        const formData = new FormData();
+        formData.append("first_name", first_name);
+        formData.append("last_name", last_name);
+        formData.append("username", username);
+        formData.append("email", email);
+        formData.append("password", password);
+        if (profile_image) {
+            formData.append("profile_image", profile_image); // Ensure profile_image is the actual file, not a URL or base64 string
+        }
+
         // Perform the registration logic, e.g., send data to your API endpoint
         try {
-            const response = await fetch("/api/register", {
+            const response = await fetch("http://127.0.0.1:8000/api/signup/", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ firstName, lastName, email, password, terms }),
+                body: formData,
             });
 
             const result = await response.json();
@@ -44,6 +58,7 @@ export default function Register() {
             if (response.ok) {
                 // Handle successful registration (e.g., redirect to login or dashboard)
                 alert("Registration successful!");
+                router.push('/login')
             } else {
                 // Handle failure
                 setErrorMessage(result.message || "Registration failed. Please try again.");
@@ -58,6 +73,7 @@ export default function Register() {
             <form
                 className="flex flex-col gap-5 w-full max-w-lg mx-auto bg-[#330b41] p-6 rounded-lg shadow-lg"
                 onSubmit={handleSubmit}
+                encType="multipart/form-data"
             >
                 {/* First Name */}
                 <div className="flex flex-col">
@@ -69,7 +85,7 @@ export default function Register() {
                         className="w-full p-3 rounded-lg bg-gray-100 border border-gray-600 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="John"
                         required
-                        value={firstName}
+                        value={first_name}
                         onChange={(e) => setFirstName(e.target.value)} // Update first name state
                     />
                 </div>
@@ -84,8 +100,23 @@ export default function Register() {
                         className="w-full p-3 rounded-lg bg-gray-100 border border-gray-600 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="Doe"
                         required
-                        value={lastName}
+                        value={last_name}
                         onChange={(e) => setLastName(e.target.value)} // Update last name state
+                    />
+                </div>
+
+                {/* Username */}
+                <div className="flex flex-col">
+                    <label htmlFor="username" className="mb-2 text-gray-300">Username</label>
+                    <input
+                        type="username"
+                        id="username"
+                        name="username"
+                        className="w-full p-3 rounded-lg bg-gray-100 border border-gray-600 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        placeholder="username"
+                        required
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)} // Update email state
                     />
                 </div>
 
@@ -131,6 +162,20 @@ export default function Register() {
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)} // Update confirm password state
+                    />
+                </div>
+
+                {/* Profile Image */}
+                <div className="flex flex-col">
+                    <label htmlFor="profile_image" className="mb-2 text-gray-300">Profile Image</label>
+                    <input
+                        type="file"
+                        accept="image/png, image/jpeg"
+                        id="profile_image"
+                        name="profile_image"
+                        className="w-full p-3 rounded-lg bg-gray-100 border border-gray-600 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        placeholder="profile_image"
+                        onChange={(e) => setProfileImage(e.target.files[0])} // Update profile_image state
                     />
                 </div>
 
