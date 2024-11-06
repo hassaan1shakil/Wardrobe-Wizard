@@ -1,4 +1,4 @@
 WardrobeWizard/myenv/
 WardrobeWizard/media/
-WardrobeWizard/__pycache__/
+WardrobeWizard/api/__pycache__/
 *.pyc

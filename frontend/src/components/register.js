@@ -170,6 +170,7 @@ export default function Register() {
                     <label htmlFor="profile_image" className="mb-2 text-gray-300">Profile Image</label>
                     <input
                         type="file"
+                        accept="image/png, image/jpeg"
                         id="profile_image"
                         name="profile_image"
                         className="w-full p-3 rounded-lg bg-gray-100 border border-gray-600 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"

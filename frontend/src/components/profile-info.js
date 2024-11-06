@@ -38,7 +38,9 @@ export default function ProfileInfo() {
             <div className="bg-PurpleBG p-8 rounded-lg shadow-lg w-full max-w-xl mb-12 ">
                 <h2 className="text-2xl font-semibold mb-6 text-center">Profile Information</h2>
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4"
+                    encType="multipart/form-data">
+
                     {/* Profile Image */}
                     <div className="flex flex-col items-center">
                         <img
@@ -50,7 +52,7 @@ export default function ProfileInfo() {
                             Change Profile Photo
                             <input
                                 type="file"
-                                accept="image/*"
+                                accept="image/png, image/jpeg"
                                 onChange={handleImageChange}
                                 className="hidden"
                             />
