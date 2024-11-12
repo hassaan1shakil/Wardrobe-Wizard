@@ -61,6 +61,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Your Next.js frontend
     # "https://your-frontend-domain.com",  # Production domain

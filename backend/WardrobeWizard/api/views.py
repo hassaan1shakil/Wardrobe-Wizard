@@ -68,14 +68,29 @@ class LoginView(generics.CreateAPIView):
             # Generate Refresh & Access Tokens
 
             refresh_token = RefreshToken.for_user(user)
-            access_token = str(refresh_token.access_token)
-
-            return Response(
-                {"access_token": access_token, "refresh_token": str(refresh_token)},
-                status=status.HTTP_200_OK,
+            response = Response({'message': 'Login successful'})
+            
+            # Set access and refresh tokens as HttpOnly cookies
+            response.set_cookie(
+                'access_token',
+                str(refresh_token.access_token),
+                httponly=True,
+                secure=True,  # Set to True if using HTTPS
+                samesite='Lax'
             )
-
+            
+            response.set_cookie(
+                'refresh_token',
+                str(refresh_token),
+                httponly=True,
+                secure=True,
+                samesite='Lax'
+            )
+            
+            return response
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
     
 # PUT Request
 class UpdateUserInforView(APIView):
