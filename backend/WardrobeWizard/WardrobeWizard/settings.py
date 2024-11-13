@@ -65,8 +65,26 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Your Next.js frontend
+    "http://127.0.0.1:3000",
     # "https://your-frontend-domain.com",  # Production domain
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",  # Add your frontend domain here
+    "http://127.0.0.1:3000",
+    # "https://yourfrontenddomain.com",  # Production frontend domain
+]
+
+# CSRF settings
+CSRF_COOKIE_HTTPONLY = True    # CSRF token cookie should not be accessible via JavaScript
+CSRF_COOKIE_SECURE = False     # Set to True for production if using HTTPS
+
+# Ensure cookies are secure for HTTPS in production
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False         # Set to True if using HTTPS in production
+SESSION_COOKIE_SAMESITE = 'None'       # Allows cookies with cross-origin GET requests
+CSRF_COOKIE_SAMESITE = 'None'          # SameSite policy for CSRF cookies
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

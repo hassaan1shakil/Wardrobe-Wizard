@@ -25,6 +25,7 @@ from .serializers import (
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 import datetime
 
 # Create your views here.
@@ -51,46 +52,49 @@ class UserSignupView(generics.CreateAPIView):
 
 
 # POST Request - Secure, Produces server-side changes like token generation & user session initiation
-class LoginView(generics.CreateAPIView):
-
-    serializer_class = LoginSerializer
-
-    # permission_classes = [IsAuthenticated]    --> Setting this does not allow any unauthorized user to even access the login endpoint which is not what we want. That is why, it will set to [AllowAny] or not set at all.
+class LoginView(TokenObtainPairView):
 
     def post(self, request, *args, **kwargs):
+        # Call the default method to generate access and refresh tokens
+        response = super().post(request, *args, **kwargs)
 
-        serializer = self.get_serializer(data=request.data)
+        # Get the access and refresh tokens from the response data
+        refresh_token = response.data['refresh']
+        access_token = response.data['access']
 
-        if serializer.is_valid():
+        # Set access and refresh tokens as HttpOnly cookies
+        response.set_cookie(
+            'access_token',
+            access_token,
+            httponly=True,
+            secure=False,  # Set to True if using HTTPS
+            samesite='None',
+            # max_age=timedelta(hours=1)  # Optional: Set expiry for cookie
+        )
 
-            user = serializer.validated_data["user"]
+        response.set_cookie(
+            'refresh_token',
+            refresh_token,
+            httponly=True,
+            secure=False,  # Set to True if using HTTPS
+            samesite='None',
+            # max_age=timedelta(days=7)  # Optional: Set expiry for cookie
+        )
 
-            # Generate Refresh & Access Tokens
-
-            refresh_token = RefreshToken.for_user(user)
-            response = Response({'message': 'Login successful'})
-            
-            # Set access and refresh tokens as HttpOnly cookies
-            response.set_cookie(
-                'access_token',
-                str(refresh_token.access_token),
-                httponly=True,
-                secure=True,  # Set to True if using HTTPS
-                samesite='Lax'
-            )
-            
-            response.set_cookie(
-                'refresh_token',
-                str(refresh_token),
-                httponly=True,
-                secure=True,
-                samesite='Lax'
-            )
-            
-            return response
+        return response
+ 
+# GET Request
+class GetUsername(generics.ListAPIView):
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
         
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        username = request.user.username
         
+        return Response({"username": username}, status=status.HTTP_200_OK)
+                
     
 # PUT Request
 class UpdateUserInforView(APIView):
