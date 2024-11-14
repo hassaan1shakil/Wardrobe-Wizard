@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from "react";
-import {useRouter} from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { setCookie } from "@/utils/cookieManager";
 
 export default function Login() {
     // Manage state for username, password, and error message
@@ -30,6 +31,11 @@ export default function Login() {
             const result = await response.json();
 
             if (response.ok) {
+
+                // Set tokens as cookies (not HttpOnly, accessible to JavaScript)
+                setCookie('access_token', result.access_token, { path: '/' });
+                setCookie('refresh_token', result.refresh_token, { path: '/' });
+
                 // Handle successful login (e.g., redirect to dashboard)
                 alert("Login successful!");
                 router.push('/home')
