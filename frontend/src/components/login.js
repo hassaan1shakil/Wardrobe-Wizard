@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from "react";
-import {useRouter} from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { setCookie } from "@/utils/cookieManager";
 
 export default function Login() {
     // Manage state for username, password, and error message
@@ -30,6 +31,18 @@ export default function Login() {
             const result = await response.json();
 
             if (response.ok) {
+
+                // Set expiry times for tokens
+                const accessExpiry = new Date();
+                accessExpiry.setTime(accessExpiry.getTime() + 15 * 60 * 1000); // Access token valid for 15 minutes
+
+                const refreshExpiry = new Date();
+                refreshExpiry.setTime(refreshExpiry.getTime() + 3 * 24 * 60 * 60 * 1000); // Refresh token valid for 3 days
+
+                // Set tokens as cookies (not HttpOnly, accessible to JavaScript)
+                setCookie('access_token', result.access_token, { path: '/', expires: accessExpiry });
+                setCookie('refresh_token', result.refresh_token, { path: '/', expires: refreshExpiry });
+
                 // Handle successful login (e.g., redirect to dashboard)
                 alert("Login successful!");
                 router.push('/home')

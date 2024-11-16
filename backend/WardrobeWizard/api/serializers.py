@@ -1,3 +1,4 @@
+import os
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
@@ -65,12 +66,38 @@ class LoginSerializer(serializers.Serializer):
  
  
 class UpdateUserInfoSerializer(serializers.ModelSerializer):
-     
+    
     class Meta: 
         
         model = CustomUser
-        fields = ['first_name', 'last_name', 'profile_image']      # how to securely change and hash password???
+        fields = ['first_name', 'last_name', 'email', 'profile_image']
         
+    def validate_email(self, value):
+        
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email is already in use.")
+        
+        return value
+        
+    def update(self, instance, validated_data):
+        
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.email = validated_data.get('email', instance.email) # email verification required
+        
+        new_profile_image = validated_data.get('profile_image', None) 
+            
+        if new_profile_image:
+            
+            # Delete the old file
+            if instance.profile_image:
+                instance.profile_image.delete(save=False)
+            
+            instance.profile_image = new_profile_image
+        
+        instance.save()
+        return instance
+                
 
 class UpdatePasswordSerializer(serializers.ModelSerializer):
     
