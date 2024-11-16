@@ -46,6 +46,17 @@ class CustomUser(AbstractUser):
             
         # Call the parent class save() to actually update the user object
         super().save(*args, **kwargs)
+        
+        
+    def delete(self, *args, **kwargs):      # Overridden to ensure deletion of image files from storage
+        
+        # Delete the file from the file system
+        if self.profile_image:
+            if os.path.isfile(self.profile_image.path):
+                os.remove(self.profile_image.path)
+        
+        # Call the parent class delete() to actually delete the object
+        super().delete(*args, **kwargs)
     
     
 class ClothingArticle(models.Model):

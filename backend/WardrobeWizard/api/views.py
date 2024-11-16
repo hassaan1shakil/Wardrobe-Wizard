@@ -82,9 +82,21 @@ class GetUsername(generics.ListAPIView):
 
     def get(self, request, *args, **kwargs):
 
-        username = request.user.username
+        response = {
+            "first_name": request.user.first_name,
+            "last_name": request.user.last_name,
+            "username": request.user.username,
+            "email": request.user.email,
+        }
 
-        return Response({"username": username}, status=status.HTTP_200_OK)
+        if request.user.profile_image:
+            profile_image = request.user.profile_image.url
+            response["profile_image"] = profile_image
+        
+        else:
+            response["profile_image"] = None
+
+        return Response(response, status=status.HTTP_200_OK)
 
 
 # PUT Request
@@ -96,7 +108,9 @@ class UpdateUserInforView(APIView):
 
     def put(self, request, *args, **kwargs):
 
-        serializer = self.serializer_class(request.user, data=request.data)
+        serializer = self.serializer_class(
+            instance=request.user, data=request.data, partial=True
+        )  # Allow partial updates
         serializer.is_valid(raise_exception=True)
         serializer.save()
 

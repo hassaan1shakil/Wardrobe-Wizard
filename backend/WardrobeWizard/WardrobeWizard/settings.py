@@ -69,6 +69,11 @@ CORS_ALLOWED_ORIGINS = [
     # "https://your-frontend-domain.com",  # Production domain
 ]
 
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',  # Frontend URL
+    "http://127.0.0.1:3000",
+]
+
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",  # Add your frontend domain here
     "http://127.0.0.1:3000",
@@ -76,11 +81,11 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # CSRF settings
-CSRF_COOKIE_HTTPONLY = True    # CSRF token cookie should not be accessible via JavaScript
+CSRF_COOKIE_HTTPONLY = False    # CSRF token cookie should not be accessible via JavaScript
 CSRF_COOKIE_SECURE = False     # Set to True for production if using HTTPS
 
 # Ensure cookies are secure for HTTPS in production
-SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_HTTPONLY = False
 SESSION_COOKIE_SECURE = False         # Set to True if using HTTPS in production
 SESSION_COOKIE_SAMESITE = 'None'       # Allows cookies with cross-origin GET requests
 CSRF_COOKIE_SAMESITE = 'None'          # SameSite policy for CSRF cookies
@@ -88,8 +93,8 @@ CSRF_COOKIE_SAMESITE = 'None'          # SameSite policy for CSRF cookies
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        'api.authentication.CookieJWTAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -97,7 +102,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=50),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
