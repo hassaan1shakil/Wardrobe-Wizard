@@ -306,10 +306,7 @@ class ListPostView(generics.ListAPIView):
                 "-createdTime"
             )[
                 :20
-            ]  # all posts except for request.user's posts + descending order of creation time + max 20 posts per api call (successive api calls sent as the page is scrolled maybe???) + TimeDelta can be used for setting oldest retrieved post as "createdTime >= createdTime +/- timedelta(days=3)"
-
-        # for post in posts_list:
-        #     post.postImage = request.build_absolute_uri(post.postImage.url)
+            ]  # all posts except for request.user's posts + descending order of creation time + max 20 posts per api call (successive api calls sent as the page is scrolled maybe???) + TimeDelta can be used for setting oldest retrieved post as "createdTime >= createdTime +/- timedelta(days=3)"            
         
         list_serializer = ListPostSerializer(posts_list, many=True, context={'request': request})
 
