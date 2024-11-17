@@ -7,7 +7,7 @@ import { getCookie } from '@/utils/cookieManager';
 // export async function getUserInfo() {
 //     try {
 //         console.log('Making request to get user info...');
-        
+
 //         const response = await fetch("http://127.0.0.1:8000/api/get-user-info/", { 
 //             method: 'GET',
 //             credentials: 'include', // Ensure this is included
@@ -34,7 +34,7 @@ import { getCookie } from '@/utils/cookieManager';
 //     return data;
 // }
 
-export default function ProfileInfo({userInfo, error}) {
+export default function UpdateProfileForm({ userInfo, error }) {
 
     // const data = testing()
     // console.log(data)
@@ -63,8 +63,8 @@ export default function ProfileInfo({userInfo, error}) {
 
         if (profileData.firstName == '' && profileData.lastName == '' && profileData.email == '')
             setResponseMessage("Please Provide The Credentials");
-        
-        else{
+
+        else {
 
             const formData = new FormData();
 
@@ -87,12 +87,22 @@ export default function ProfileInfo({userInfo, error}) {
                     setResponseMessage(response.data.message)
                 }
 
-                else{
+                else {
                     setResponseMessage(response.data.message || "Profile Info Could Not Be Updated. Please Try Again.")
                 }
 
             } catch (error) {
                 setResponseMessage(error.response.data.email[0] || "An error occurred. Please try again.");
+            
+            } finally {
+
+                // Reset to initial state
+                setProfileData({
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    profileImage: '',
+                });
             }
         }
     };
