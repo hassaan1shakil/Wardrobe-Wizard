@@ -7,7 +7,7 @@ export default function Post({post}) {
         <>
             <div className="flex flex-col gap-1">
                 <Image
-                    src={post.imageURL}
+                    src={post.postImage}
                     alt={post.caption}
                     width={300}
                     height={300}
@@ -16,6 +16,7 @@ export default function Post({post}) {
                 />
                 <h2>{post.caption}</h2>
                 <p>Posted by: {post.user}</p>
+                <p>Likes: {post.likes.length}</p>
             </div>
         </>
     )
