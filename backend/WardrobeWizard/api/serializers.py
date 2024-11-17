@@ -298,6 +298,12 @@ class ListPostSerializer(serializers.ModelSerializer):
         model = Post
         fields = "__all__"  # see if i need to send the likesList or just the likesCount
         
+    def get_postImage(self, obj):
+        request = self.context.get('request')
+        if obj.image:
+            return request.build_absolute_uri(obj.image.url)
+        return None
+        
         
 class DeletePostSerializer(serializers.Serializer):
     

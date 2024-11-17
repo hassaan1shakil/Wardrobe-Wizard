@@ -73,7 +73,7 @@ class LoginView(TokenObtainPairView):
 
 
 # GET Request
-class GetUsername(generics.ListAPIView):
+class GetUserInfo(generics.ListAPIView):
 
     authentication_classes = [
         CookieJWTAuthentication
@@ -277,8 +277,7 @@ class ListArticleView(generics.ListAPIView):
 
         list_serializer = ListArticleSerializer(posts_list, many=True)
 
-        return Response(list_serializer.data)
-
+        return Response({"articles":list_serializer.data}, status=status.HTTP_200_OK)
 
 # GET Request - Using 2 Serializers (one for validating category & one for serializing Django Model to Native Datatypes)
 class ListPostView(generics.ListAPIView):
@@ -291,7 +290,7 @@ class ListPostView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
 
         category_serializer = PostCategorySerializer(
-            data=request.query_params
+            data=request.query_params,
         )  # or request.GET
         category_serializer.is_valid(raise_exception=True)
 
@@ -309,9 +308,12 @@ class ListPostView(generics.ListAPIView):
                 :20
             ]  # all posts except for request.user's posts + descending order of creation time + max 20 posts per api call (successive api calls sent as the page is scrolled maybe???) + TimeDelta can be used for setting oldest retrieved post as "createdTime >= createdTime +/- timedelta(days=3)"
 
-        list_serializer = ListPostSerializer(posts_list, many=True)
+        # for post in posts_list:
+        #     post.postImage = request.build_absolute_uri(post.postImage.url)
+        
+        list_serializer = ListPostSerializer(posts_list, many=True, context={'request': request})
 
-        return Response(list_serializer.data)
+        return Response({"posts":list_serializer.data}, status=status.HTTP_200_OK)
 
 
 # DELETE Request

@@ -1,5 +1,8 @@
+'use client'
+
 import axios from 'axios';
-import Router from 'next/router';
+import { useRouter } from 'next/navigation';
+// import Router from 'next/router';
 import { getCookie, setCookie } from "@/utils/cookieManager";
 
 // Create an Axios instance
@@ -48,7 +51,9 @@ api.interceptors.response.use(
         
         // Redirect to login page
         alert("Session Expired!");
-        Router.push('/login');
+        const router = useRouter()
+        router.push('/login');
+        // Router.push('/login');
         
         return Promise.reject(err);
       }
