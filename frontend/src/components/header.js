@@ -61,6 +61,7 @@ export default function Header() {
           <Link href="/wardrobe" className="px-4 py-2 rounded-md">Wardrobe</Link>
           <Link href="/outfits" className="px-4 py-2 rounded-md">Outfits</Link>
           <Link href="/community" className="px-4 py-2 rounded-md">Community</Link>
+          <Link href="/profile" className="px-4 py-2 rounded-md">Profile</Link>
           <Link href="/about" className="px-4 py-2 rounded-md">About</Link>
         </div>
 

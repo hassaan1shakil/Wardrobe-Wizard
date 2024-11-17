@@ -90,7 +90,7 @@ class GetUserInfo(generics.ListAPIView):
         }
 
         if request.user.profile_image:
-            profile_image = request.user.profile_image.url
+            profile_image = request.build_absolute_uri(request.user.profile_image.url)
             response["profile_image"] = profile_image
         
         else:

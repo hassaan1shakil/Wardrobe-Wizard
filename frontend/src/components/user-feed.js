@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Post from "@/components/post";
 import api from "@/utils/api";
 
-export default function CommunityFeed() {
+export default function UserFeed() {
 
     const [feedPosts, setPosts] = useState([])
     const [loading, setLoading] = useState(true)
@@ -85,10 +85,9 @@ export default function CommunityFeed() {
     console.warn(feedPosts.posts)
 
     return (
-
         <div className="mt-14">
 
-            <h1 className="flex text-4xl justify-center">Trending Posts</h1>
+            <h1 className="flex text-4xl justify-center">My Posts</h1>
 
             <div className="bg-darkPurple min-h-screen flex justify-evenly">
 
@@ -97,5 +96,6 @@ export default function CommunityFeed() {
             </div>
 
         </div>
+
     )
 }
