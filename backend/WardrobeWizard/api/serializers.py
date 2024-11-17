@@ -293,16 +293,30 @@ class PostCategorySerializer(serializers.Serializer):
     
 class ListPostSerializer(serializers.ModelSerializer):
 
+    username = serializers.SerializerMethodField()
+    liked_by_user = serializers.SerializerMethodField()
+
     class Meta:
         
         model = Post
         fields = "__all__"  # see if i need to send the likesList or just the likesCount
         
+    def get_username(self, obj):
+        
+        request = self.context.get('request')
+        return obj.user.username
+        
     def get_postImage(self, obj):
+        
         request = self.context.get('request')
         if obj.image:
             return request.build_absolute_uri(obj.image.url)
         return None
+    
+    def get_liked_by_user(self, obj):
+        
+        request = self.context.get('request')
+        return obj.likes.filter(id=request.user.id).exists()
         
         
 class DeletePostSerializer(serializers.Serializer):

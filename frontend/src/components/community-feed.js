@@ -85,9 +85,8 @@ export default function CommunityFeed() {
     console.warn(feedPosts.posts)
 
     return (
-        <div className="bg-darkPurple min-h-screen">
+        <div className="bg-darkPurple min-h-screen flex justify-evenly">
 
-            {/* {typeof(feedPosts.posts)} */}
             {renderPosts(feedPosts)}
 
         </div>
