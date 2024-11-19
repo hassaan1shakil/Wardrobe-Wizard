@@ -1,14 +1,27 @@
 'use client'
 
 import { useState, useEffect } from "react"
+import Image from "next/image";
 import Post from "@/components/post";
 import api from "@/utils/api";
+import UploadPostModal from "./upload-post-modal";
 
 export default function UserFeed() {
 
     const [feedPosts, setPosts] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    
+    // Upload Post Modal
+    const [uploadModal, setUploadModal] = useState(false);
+
+    const openUploadModal = () => {
+        setUploadModal(true);
+    }
+
+    const closeUploadModal = () => {
+        setUploadModal(false);
+    }
 
     useEffect(() => {
 
@@ -87,13 +100,27 @@ export default function UserFeed() {
     return (
         <div className="mt-14">
 
-            <h1 className="flex text-4xl justify-center">My Posts</h1>
+            <div className="flex text-4xl justify-center gap-4">
+                <h1>My Posts</h1>
+
+                <button className="rounded-md" onClick={openUploadModal}>
+                    <Image
+                        src="/images/plus-icon.png"
+                        alt="add-post"
+                        width={32}
+                        height={32}
+                        priority
+                    />
+                </button>
+            </div>
 
             <div className="bg-darkPurple min-h-screen flex justify-evenly">
 
                 {renderPosts(feedPosts)}
 
             </div>
+
+            {uploadModal && <UploadPostModal closeModal={closeUploadModal}/>}
 
         </div>
 
