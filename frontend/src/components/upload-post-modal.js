@@ -1,8 +1,10 @@
+'use client';
+
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import api from "@/utils/api";
 
-export default function UploadModal({ closeModal }) {
-
+export default function UploadModal({ closeUploadModal, onPostCreated }) {
     const [image, setImage] = useState(null);
     const [caption, setCaption] = useState("");
     const [imagePreview, setImagePreview] = useState(null);
@@ -16,47 +18,51 @@ export default function UploadModal({ closeModal }) {
         }
     };
 
+    // Mutation to handle post creation
+    const { mutateAsync, isLoading, error } = useMutation({
+        mutationFn: async (formData) => {
+            const response = await api.post('/create-post/', formData);
+            if (response.status !== 201) {  // remember to keep this 201
+                throw new Error(response.data.message || "Post Could Not Be Created");
+            }
+            return response.data;
+        },
+        onSuccess: (data) => {
+            setResponseMessage(data.message || "Post Created Successfully!");
+            closeUploadModal();
+            onPostCreated() // Notify Parent to invalidate query
+        },
+        onError: (error) => {
+            setResponseMessage(error.message || "An error occurred. Please try again.");
+        }
+    });
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         const formData = new FormData();
+        if (caption !== '') formData.append("caption", caption);
+        if (image !== null) formData.append("postImage", image);
 
-        if (caption != '')
-            formData.append("caption", caption)
-
-        if (image != null)
-            formData.append("postImage", image)
-
+        // Call the mutation
         try {
-            const response = await api.post('/create-post/', formData);
-
-            if (response.status === 200) {
-                setResponseMessage(response.data.message)
-            }
-
-            else {
-                setResponseMessage(response.data.message || "Post Could Not Be Created. Please Try Again.")
-            }
-
+            await mutateAsync(formData);
         } catch (error) {
-            setResponseMessage(error.message || "An error occurred. Please try again.");
-
+            // Error is handled by onError callback in useMutation
         } finally {
-
-            // Reset to initial state
+            // Reset to initial state after submission
             setCaption("");
             setImage(null);
-            setImagePreview(false);
+            setImagePreview(null);
         }
-
-    }
+    };
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="bg-darkPurple rounded-lg shadow-lg w-11/12 sm:w-96 p-6 relative">
                 {/* Close Button */}
                 <button
-                    onClick={closeModal}
+                    onClick={closeUploadModal}
                     className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
                 >
                     &times;
@@ -119,10 +125,12 @@ export default function UploadModal({ closeModal }) {
                     </div>
 
                     {/* Submit Button */}
-                    <button type="submit"
-                        className="bg-darkOrange hover:bg-lightOrange w-full text-white px-4 py-2 rounded-md text-xl font-bold">
-
-                        Post
+                    <button 
+                        type="submit"
+                        className={`bg-darkOrange hover:bg-lightOrange w-full text-white px-4 py-2 rounded-md text-xl font-bold ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                        disabled={isLoading}
+                    >
+                        {isLoading ? "Posting..." : "Post"}
                     </button>
 
                     {/* Display response message */}

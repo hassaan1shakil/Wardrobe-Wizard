@@ -13,7 +13,7 @@ export default function Post({ post }) {
                     width={300}
                     height={300}
                     // layout="intrinsic"
-                    className="rounded-xl mb-2"
+                    className="rounded-xl mb-2 object-cover overflow-hidden"
                 />
 
                 <p>
