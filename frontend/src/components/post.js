@@ -2,10 +2,7 @@ import Image from "next/image"
 import LikeButton from "./like-button"
 import OptionsButton from "./options-button"
 
-export default function Post({ post, handlePostDeleted }) {
-
-    // Add useSate() here or React Query
-    // Add handleDeletePost here
+export default function Post({ post, handlePostDeleted, showOptions }) {
 
     return (
 
@@ -27,18 +24,17 @@ export default function Post({ post, handlePostDeleted }) {
                         likeStatus={post.liked_by_user}
                     />
 
-                    <OptionsButton
+                    {showOptions && <OptionsButton
                         objectID={post.id}
                         handlePostDeleted={handlePostDeleted}
-                    />
+                    />}
+
                 </div>
 
                 <div class="flex flex-col">
                     <span class="font-bold mb-1">{post.username} </span>
                     <span class="break-words whitespace-normal">{post.caption}</span>
                 </div>
-
-                {/* Add Delete Post Modal here */}
 
             </div>
         </>
