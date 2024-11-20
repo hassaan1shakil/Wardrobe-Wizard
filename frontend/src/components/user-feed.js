@@ -34,7 +34,7 @@ export default function UserFeed() {
     });
 
     // After post is created, invalidate the 'posts' query to refetch
-    const handlePostCreated = () => {
+    const handlePostChange = () => {
         queryClient.invalidateQueries('userPosts'); // This will trigger a refetch of posts
     };
 
@@ -43,7 +43,7 @@ export default function UserFeed() {
             return (
                 <div className="flex flex-wrap gap-x-12 gap-y-10 px-36 py-14 justify-start content-start">
                     {posts.map((postObject) => (
-                        <Post key={postObject.id} post={postObject} />
+                        <Post key={postObject.id} post={postObject} handlePostDeleted={handlePostChange}/>
                     ))}
                 </div>
             );
@@ -85,7 +85,7 @@ export default function UserFeed() {
                 {renderPosts(data)}
             </div>
 
-            {uploadModal && <UploadPostModal closeUploadModal={closeUploadModal} onPostCreated={handlePostCreated}/>}
+            {uploadModal && <UploadPostModal closeUploadModal={closeUploadModal} onPostCreated={handlePostChange}/>}
         </div>
     );
 }
