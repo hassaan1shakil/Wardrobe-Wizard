@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import api from "@/utils/api";
 
-export default function UploadModal({ closeUploadModal, onPostCreated }) {
+export default function UploadPostModal({ closeUploadModal, onPostCreated }) {
     const [image, setImage] = useState(null);
     const [caption, setCaption] = useState("");
     const [imagePreview, setImagePreview] = useState(null);
@@ -63,7 +63,7 @@ export default function UploadModal({ closeUploadModal, onPostCreated }) {
                 {/* Close Button */}
                 <button
                     onClick={closeUploadModal}
-                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                    className="absolute top-2 right-3 text-gray-400 hover:text-gray-600 text-4xl"
                 >
                     &times;
                 </button>
