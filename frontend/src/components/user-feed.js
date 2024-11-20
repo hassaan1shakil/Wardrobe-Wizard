@@ -1,101 +1,91 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+// import { useQueryClient } from "@tanstack/react-query/build/legacy";
+import { useState } from "react";
+import Image from "next/image";
 import Post from "@/components/post";
 import api from "@/utils/api";
+import UploadPostModal from "./upload-post-modal";
+
 
 export default function UserFeed() {
+    // Upload Post Modal
+    const [uploadModal, setUploadModal] = useState(false);
+    const queryClient = useQueryClient();
 
-    const [feedPosts, setPosts] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const openUploadModal = () => {
+        setUploadModal(true);
+    };
 
-    useEffect(() => {
+    const closeUploadModal = () => {
+        setUploadModal(false);
+    };
 
-        const fetchPosts = async () => {
+    // Fetch posts using useQuery
+    const { data, isLoading, isError, error } = useQuery({
+        queryKey: ["userPosts"],
+        queryFn: async () => {
+            const response = await api.get("/list-posts/", {
+                params: { category: "user" },
+            });
+            return response.data.posts;
+        },
+    });
 
-            try {
-                const response = await api.get('/list-posts/', {
-                    params: {
-                        category: "user"    // setting user for checking
-                    }
-                });
-
-                if (response.status !== 200) {
-                    throw new Error("Couldn't Fetch Posts")
-                }
-
-                const data = response.data;
-                setPosts(data.posts);
-
-            } catch (error) {
-                setError(error.message);
-
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchPosts();
-
-    }, [])
+    // After post is created, invalidate the 'posts' query to refetch
+    const handlePostCreated = () => {
+        queryClient.invalidateQueries('userPosts'); // This will trigger a refetch of posts
+    };
 
     function renderPosts(posts) {
-
         if (posts) {
             return (
-
-                <div className="flex flex-wrap gap-10 px-10 py-14 justify-center">
-                    {posts.map(postObject => (
-
-                        <Post
-                            key={postObject.id}
-                            post={postObject}
-                        />
+                <div className="flex flex-wrap gap-x-12 gap-y-10 px-36 py-14 justify-start content-start">
+                    {posts.map((postObject) => (
+                        <Post key={postObject.id} post={postObject} />
                     ))}
-
                 </div>
-            )
-        }
-
-        else {
+            );
+        } else {
             return null;
         }
-
     }
 
-    if (loading)
+    if (isLoading)
         return (
             <div className="bg-darkPurple min-h-screen">
-
                 Loading Posts...
-
             </div>
-        )
+        );
 
-    if (error)
+    if (isError)
         return (
             <div className="bg-darkPurple min-h-screen">
-
-                Error: {error}
-
+                Error: {error.message}
             </div>
-        )
-
-    console.warn(feedPosts.posts)
+        );
 
     return (
         <div className="mt-14">
-
-            <h1 className="flex text-4xl justify-center">My Posts</h1>
-
-            <div className="bg-darkPurple min-h-screen flex justify-evenly">
-
-                {renderPosts(feedPosts)}
-
+            <div className="flex text-4xl justify-center gap-4">
+                <h1>My Posts</h1>
+                <button className="rounded-md" onClick={openUploadModal}>
+                    <Image
+                        src="/images/plus-icon.png"
+                        alt="add-post"
+                        width={32}
+                        height={32}
+                        priority
+                    />
+                </button>
             </div>
 
-        </div>
+            <div className="bg-darkPurple min-h-screen flex justify-evenly">
+                {renderPosts(data)}
+            </div>
 
-    )
+            {uploadModal && <UploadPostModal closeUploadModal={closeUploadModal} onPostCreated={handlePostCreated}/>}
+        </div>
+    );
 }

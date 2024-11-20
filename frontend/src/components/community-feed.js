@@ -45,7 +45,7 @@ export default function CommunityFeed() {
         if (posts) {
             return (
 
-                <div className="flex flex-wrap gap-10 px-10 py-14 justify-center">
+                <div className="flex flex-wrap gap-x-12 gap-y-10 px-36 py-14 justify-start content-start">
                     {posts.map(postObject => (
 
                         <Post
