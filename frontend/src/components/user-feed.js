@@ -1,7 +1,6 @@
 'use client';
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-// import { useQueryClient } from "@tanstack/react-query/build/legacy";
 import { useState } from "react";
 import Image from "next/image";
 import Post from "@/components/post";
@@ -10,6 +9,7 @@ import UploadPostModal from "./upload-post-modal";
 
 
 export default function UserFeed() {
+
     // Upload Post Modal
     const [uploadModal, setUploadModal] = useState(false);
     const queryClient = useQueryClient();
@@ -43,7 +43,7 @@ export default function UserFeed() {
             return (
                 <div className="flex flex-wrap gap-x-12 gap-y-10 px-36 py-14 justify-start content-start">
                     {posts.map((postObject) => (
-                        <Post key={postObject.id} post={postObject} handlePostDeleted={handlePostChange}/>
+                        <Post key={postObject.id} post={postObject} handlePostDeleted={handlePostChange} showOptions={true}/>
                     ))}
                 </div>
             );

@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Header from '@/components/header';
 import OutfitsForm from '@/components/outfits-form';
-import OutfitsGallery from '@/components/outfits-gallery';
-import OutfitsModal from '@/components/outfits-modal';
+import OutfitsGallery from '@/components/articles-gallery';
+import OutfitsModal from '@/components/view-articles-modal';
 import OutfitPreview from '@/components/outfit-preview';
 
 export default function OutfitsPage() {

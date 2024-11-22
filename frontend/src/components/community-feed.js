@@ -51,6 +51,7 @@ export default function CommunityFeed() {
                         <Post
                             key={postObject.id}
                             post={postObject}
+                            showOptions={false}
                         />
                     ))}
 
