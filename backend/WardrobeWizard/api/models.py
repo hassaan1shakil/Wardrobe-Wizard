@@ -57,15 +57,22 @@ class CustomUser(AbstractUser):
         
         # Call the parent class delete() to actually delete the object
         super().delete(*args, **kwargs)
-    
+ 
+ 
+class Tag(models.Model):
+
+    def __str__(self):
+        return self.name
+
+    tagName = models.CharField(max_length=100, unique=True)
+       
     
 class ClothingArticle(models.Model):
     
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)        # if user is deleted, all clothing items will be deleted (which is not akin to real life)
     articleImage = models.ImageField(upload_to=get_custom_upload_path)
     category = models.CharField(max_length=20, null=True)
-    ### This has been removed from the table. Chnage datatype this time
-    #tagsList = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    tags_list = models.ManyToManyField(Tag, related_name='clothing_articles')   # related_name allows reverse access from Tag Class
 
     def __str__(self):
         return self.name
@@ -102,11 +109,3 @@ class Comment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)      # this may be redundant here since post deletion triggers deletion of comments
     text = models.CharField(max_length=100)
     createdTime = models.DateTimeField(auto_now_add=True)
-    
-    
-class Tag(models.Model):
-    
-    def __str__(self):
-        return self.name
-    
-    tagName = models.CharField(max_length=50)

@@ -1,36 +1,35 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import api from "@/utils/api";
 
-export default function UploadPostModal({ closeUploadModal, onPostCreated }) {
-    const [image, setImage] = useState(null);
-    const [caption, setCaption] = useState("");
-    const [imagePreview, setImagePreview] = useState(null);
+export default function UploadArticleModal({ closeUploadModal }) {
+    const [images, setImages] = useState(null);
+    const [imagePreviews, setImagePreviews] = useState([]);
     const [responseMessage, setResponseMessage] = useState("");
 
     const handleImageChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setImage(file);
-            setImagePreview(URL.createObjectURL(file));
+        const files = Array.from(event.target.files);
+        if (files) {
+            setImages(files);
+            const previews = files.map((file) => URL.createObjectURL(file));
+            setImagePreviews(previews);
         }
     };
 
     // Mutation to handle post creation
     const { mutateAsync, isLoading, error } = useMutation({
         mutationFn: async (formData) => {
-            const response = await api.post('/create-post/', formData);
+            const response = await api.post('/upload-article/', formData);
             if (response.status !== 201) {  // remember to keep this 201
-                throw new Error(response.data.message || "Post Could Not Be Created");
+                throw new Error(response.data.message || "Articles Could Not Be Created");
             }
             return response.data;
         },
         onSuccess: (data) => {
-            setResponseMessage(data.message || "Post Created Successfully!");
+            setResponseMessage(data.message || "Articles Created Successfully!");
             closeUploadModal();
-            onPostCreated() // Notify Parent to invalidate query
         },
         onError: (error) => {
             setResponseMessage(error.message || "An error occurred. Please try again.");
@@ -41,8 +40,13 @@ export default function UploadPostModal({ closeUploadModal, onPostCreated }) {
         e.preventDefault();
 
         const formData = new FormData();
-        if (caption !== '') formData.append("caption", caption);
-        if (image !== null) formData.append("postImage", image);
+
+        if (images !== null) {
+            // Loop through the images array and append each one with a unique field name
+            images.forEach((image, index) => {
+                formData.append(`images_list[${index}]`, image); // appending each image with an indexed name
+            });
+        }
 
         // Call the mutation
         try {
@@ -51,11 +55,17 @@ export default function UploadPostModal({ closeUploadModal, onPostCreated }) {
             // Error is handled by onError callback in useMutation
         } finally {
             // Reset to initial state after submission
-            setCaption("");
-            setImage(null);
-            setImagePreview(null);
+            setImages(null);
+            setImagePreviews([]);
         }
     };
+
+    // Cleaning Up Preview URLs to prevent memory leaks
+    useEffect(() => {
+        return () => {
+            imagePreviews.forEach((url) => URL.revokeObjectURL(url));
+        };
+    }, [imagePreviews]);
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -68,7 +78,7 @@ export default function UploadPostModal({ closeUploadModal, onPostCreated }) {
                     &times;
                 </button>
 
-                <h2 className="text-2xl font-bold mb-4 text-center">New Post</h2>
+                <h2 className="text-2xl font-bold mb-4 text-center">New Articles</h2>
                 <form
                     onSubmit={handleSubmit}
                     encType="multipart/form-data"
@@ -77,57 +87,41 @@ export default function UploadPostModal({ closeUploadModal, onPostCreated }) {
                     {/* File Upload */}
                     <div>
                         <label
-                            htmlFor="image"
+                            htmlFor="images"
                             className="block font-bold"
                         >
-                            Upload Image
+                            Upload Images
                         </label>
                         <input
                             type="file"
-                            id="image"
-                            name="image"
+                            id="images"
+                            name="images"
                             accept="image/png, image/jpeg"
+                            multiple // Allow multiple file selection
                             onChange={handleImageChange}
                             className="block w-full mt-1 text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                             required
                         />
                     </div>
 
-                    {/* Image Preview */}
-                    {imagePreview && (
-                        <div className="pt-2">
-                            <img
-                                src={imagePreview}
-                                alt="Preview"
-                                className="w-full h-auto rounded border border-darkPurple"
-                            />
+                    {/* Image Previews */}
+                    {imagePreviews.length > 0 && (
+                        <div className="pt-2 grid grid-cols-2 gap-2">
+                            {imagePreviews.map((src, index) => (
+                                <img
+                                    key={index}
+                                    src={src}
+                                    alt={`Preview ${index + 1}`}
+                                    className="w-full h-auto rounded border border-darkPurple"
+                                />
+                            ))}
                         </div>
                     )}
 
-                    {/* Caption Input */}
-                    <div>
-                        <label
-                            htmlFor="caption"
-                            className="block font-bold"
-                        >
-                            Caption
-                        </label>
-                        <textarea
-                            id="caption"
-                            name="caption"
-                            rows="2"
-                            value={caption}
-                            onChange={(e) => setCaption(e.target.value)}
-                            placeholder="Write a caption..."
-                            className="block w-full mt-1 text-black border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                            required
-                        />
-                    </div>
-
                     {/* Submit Button */}
-                    <button 
+                    <button
                         type="submit"
-                        className={`bg-darkOrange hover:bg-lightOrange w-full text-white px-4 py-2 rounded-md text-xl font-bold ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                        className={`bg-darkOrange hover:bg-lightOrange w-full text-white px-4 py-2 rounded-md text-xl font-bold ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         disabled={isLoading}
                     >
                         {isLoading ? "Posting..." : "Post"}
@@ -138,5 +132,6 @@ export default function UploadPostModal({ closeUploadModal, onPostCreated }) {
                 </form>
             </div>
         </div>
+
     );
 }

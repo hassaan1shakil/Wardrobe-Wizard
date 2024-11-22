@@ -207,25 +207,20 @@ class DeleteArticleSerializer(serializers.Serializer):
     
     # Any variable initialized in the serializer here is added to validated_data after successful validation so it can be accessed in the view
     
-    id_list = serializers.ListField(child=serializers.IntegerField(), allow_empty=False, required=True)
+    article_id = serializers.IntegerField(required=True)
     
-    def validate_id_list(self, id_list):
+    def validate_article_id(self, value):
         
+        article_id = value
         request = self.context.get('request')
-        current_user = request.user
         
-        if not id_list:
-            raise serializers.ValidationError("Please choose an image to be deleted.")
-               
-        for id_item in id_list:
+        try:
+            ClothingArticle.objects.get(id=article_id, user=request.user)
             
-            try:
-                ClothingArticle.objects.get(id=id_item, user=current_user)
-                
-            except ClothingArticle.DoesNotExist:
-                raise serializers.ValidationError("Image Not Found")
+        except ClothingArticle.DoesNotExist:
+            raise serializers.ValidationError("Article Does Not Exist")
         
-        return id_list
+        return value
     
     
 class ArticleCategorySerializer(serializers.Serializer):
@@ -235,7 +230,7 @@ class ArticleCategorySerializer(serializers.Serializer):
     def validate_category(self, value):
         
         category = value
-        possible_values = ["tops", "bottoms", "footwears", "accessories"]
+        possible_values = ["tops", "bottoms", "footwear", "accessories"]
         
         if category in possible_values:
             return category
@@ -249,8 +244,15 @@ class ListArticleSerializer(serializers.ModelSerializer):
     class Meta:
         
         model = ClothingArticle
-        fields = "__all__"
+        fields = ["id", "articleImage"]     # add category here once classification model is set up so QueryInvalidate can be made more specific
+    
+    def get_articleImage(self, obj):
         
+        request = self.context.get('request')
+        if obj.image:
+            return request.build_absolute_uri(obj.image.url)
+        return None
+    
 
 class CreatePostSerializer(serializers.ModelSerializer):
     

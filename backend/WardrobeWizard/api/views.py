@@ -92,7 +92,7 @@ class GetUserInfo(generics.ListAPIView):
         if request.user.profile_image:
             profile_image = request.build_absolute_uri(request.user.profile_image.url)
             response["profile_image"] = profile_image
-        
+
         else:
             response["profile_image"] = None
 
@@ -214,21 +214,49 @@ class DeleteArticleView(generics.DestroyAPIView):
         )  # explicity passing request in the context
         serializer.is_valid(raise_exception=True)
 
-        id_list = serializer.validated_data.get("id_list")
+        validated_id = serializer.validated_data.get("article_id")
 
-        # Deleting Articles (using Django lookup type -- very powerful)
-        # Bulk Delete does not call the .delete() method of model.
-        # Instead, it just executes a SQL query directly which may create loopholes.
+        article = ClothingArticle.objects.get(id=validated_id, user=request.user)
 
-        articles = ClothingArticle.objects.filter(id__in=id_list, user=request.user)
+        if article:
+            article.delete()
 
-        for item in articles:
-            item.delete()
+        else:
+            return Response(
+                {"error": "Post Not Found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         return Response(
-            {"message": f"{len(id_list)} Clothing Articles Deleted Successfully"},
+            {"message": f"Article Id: {validated_id} Deleted Successfully"},
             status=status.HTTP_200_OK,
         )
+
+
+# GET Request - Using 2 Serializers (one for validating category & one for serializing Django Model to Native Datatypes)
+class ListArticleView(generics.ListAPIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    # User sends 1 of 4 possible keywords: "tops", "bottoms", "footwear", "accessories" (Match Spelling in Frontend)
+
+    def get(self, request, *args, **kwargs):
+
+        category_serializer = ArticleCategorySerializer(
+            data=request.query_params
+        )  # or request.GET
+        category_serializer.is_valid(raise_exception=True)
+
+        vaildated_category = category_serializer.validated_data.get("category")
+        posts_list = ClothingArticle.objects.filter(
+            user=request.user,  # category=vaildated_category  # changing this temporarily for testing**************************
+        )
+
+        list_serializer = ListArticleSerializer(
+            posts_list, many=True, context={"request": request}
+        )
+
+        return Response({"articles": list_serializer.data}, status=status.HTTP_200_OK)
 
 
 # POST Request
@@ -254,30 +282,6 @@ class CreatePostView(generics.CreateAPIView):
             status=status.HTTP_201_CREATED,
         )
 
-
-# GET Request - Using 2 Serializers (one for validating category & one for serializing Django Model to Native Datatypes)
-class ListArticleView(generics.ListAPIView):
-
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    # User sends 1 of 4 possible keywords: "tops", "bottoms", "footwears", "accessories" (Match Spelling in Frontend)
-
-    def get(self, request, *args, **kwargs):
-
-        category_serializer = ArticleCategorySerializer(
-            data=request.query_params
-        )  # or request.GET
-        category_serializer.is_valid(raise_exception=True)
-
-        vaildated_category = category_serializer.validated_data.get("category")
-        posts_list = ClothingArticle.objects.filter(
-            category=vaildated_category, user=request.user
-        )
-
-        list_serializer = ListArticleSerializer(posts_list, many=True)
-
-        return Response({"articles":list_serializer.data}, status=status.HTTP_200_OK)
 
 # GET Request - Using 2 Serializers (one for validating category & one for serializing Django Model to Native Datatypes)
 class ListPostView(generics.ListAPIView):
@@ -306,11 +310,13 @@ class ListPostView(generics.ListAPIView):
                 "-createdTime"
             )[
                 :20
-            ]  # all posts except for request.user's posts + descending order of creation time + max 20 posts per api call (successive api calls sent as the page is scrolled maybe???) + TimeDelta can be used for setting oldest retrieved post as "createdTime >= createdTime +/- timedelta(days=3)"            
-        
-        list_serializer = ListPostSerializer(posts_list, many=True, context={'request': request})
+            ]  # all posts except for request.user's posts + descending order of creation time + max 20 posts per api call (successive api calls sent as the page is scrolled maybe???) + TimeDelta can be used for setting oldest retrieved post as "createdTime >= createdTime +/- timedelta(days=3)"
 
-        return Response({"posts":list_serializer.data}, status=status.HTTP_200_OK)
+        list_serializer = ListPostSerializer(
+            posts_list, many=True, context={"request": request}
+        )
+
+        return Response({"posts": list_serializer.data}, status=status.HTTP_200_OK)
 
 
 # DELETE Request

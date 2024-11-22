@@ -27,6 +27,9 @@ export default function Post({ post, handlePostDeleted, showOptions }) {
                     {showOptions && <OptionsButton
                         objectID={post.id}
                         handlePostDeleted={handlePostDeleted}
+                        postFlag={true}
+                        articleFlag={false}
+                        outfitFlag={false}
                     />}
 
                 </div>
