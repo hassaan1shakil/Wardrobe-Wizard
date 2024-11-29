@@ -27,9 +27,6 @@ class UserSignupSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])   # Hash the password
         user.save()
         return user
-        
-    def update(self, validated_data): # Complete this!!!
-        return 1
     
         
 class LoginSerializer(serializers.Serializer):
@@ -185,23 +182,6 @@ class AddArticleSerializer(serializers.ModelSerializer):
         
         return articles_list
 
-# Format for Incoming POST Request -- Not Checking Duplicate Image Uploads
-
-#"images_list": [
-
-#     {
-#         "image": "file1.png" # would be an actual image file, not a path
-#     },
-
-#     {
-#         "image": "file2.png"
-#     },
-
-#     {
-#         "image": "file3.png" 
-#     }
-# ]
-
 
 class DeleteArticleSerializer(serializers.Serializer):
     
@@ -230,7 +210,7 @@ class ArticleCategorySerializer(serializers.Serializer):
     def validate_category(self, value):
         
         category = value
-        possible_values = ["tops", "bottoms", "footwear", "accessories"]
+        possible_values = ["top", "bottom", "foot"]
         
         if category in possible_values:
             return category
@@ -244,13 +224,13 @@ class ListArticleSerializer(serializers.ModelSerializer):
     class Meta:
         
         model = ClothingArticle
-        fields = ["id", "articleImage"]     # add category here once classification model is set up so QueryInvalidate can be made more specific
+        fields = ["id", "articleImage", "category", "tags_list"]     # add category here once classification model is set up so QueryInvalidate can be made more specific
     
     def get_articleImage(self, obj):
         
         request = self.context.get('request')
-        if obj.image:
-            return request.build_absolute_uri(obj.image.url)
+        if obj.articleImage:
+            return request.build_absolute_uri(obj.articleImage.url)
         return None
     
 
@@ -311,8 +291,8 @@ class ListPostSerializer(serializers.ModelSerializer):
     def get_postImage(self, obj):
         
         request = self.context.get('request')
-        if obj.image:
-            return request.build_absolute_uri(obj.image.url)
+        if obj.postImage:
+            return request.build_absolute_uri(obj.postImage.url)
         return None
     
     def get_liked_by_user(self, obj):
