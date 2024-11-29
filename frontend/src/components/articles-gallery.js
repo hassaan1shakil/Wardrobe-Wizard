@@ -67,6 +67,9 @@ export default function ArticlesGallery({ category }) {   // responseData, Categ
 
     function capitalizeFirstLetter(word) {
         if (!word) return ""; // Handle empty or null input
+        if (word==="top") word = "tops"
+        if (word==="bottom") word = "bottoms"
+        if (word==="foot") word = "footwear"
         return word.charAt(0).toUpperCase() + word.slice(1);
       }
 

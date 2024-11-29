@@ -1,8 +1,9 @@
 from rest_framework.views import APIView
-from .models import CustomUser, ClothingArticle, Post, Comment
+from .models import CustomUser, ClothingArticle, Post, Comment, Tag
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.conf import settings
 from .serializers import (
     UserSignupSerializer,
     LoginSerializer,
@@ -28,6 +29,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from api.authentication import CookieJWTAuthentication
 import datetime
+import subprocess
+import os
 
 # Create your views here.
 
@@ -174,6 +177,37 @@ class DeleteUserView(generics.DestroyAPIView):
             {"error": "User Account Not Found"}, status=status.HTTP_404_NOT_FOUND
         )
 
+def get_absolute_media_path(img):
+    
+    if img:
+        # Get the relative path of the image
+        image_relative_path = img.url  # This is something like '/media/images/my_image.jpg'
+
+        # Remove the leading '/media' part from the URL
+        image_path = image_relative_path.lstrip('/media')
+
+        # Combine MEDIA_ROOT with the image's relative path to form the absolute path
+        absolute_path = os.path.join(settings.MEDIA_ROOT, image_path)
+
+        return absolute_path
+    return None
+
+def to_snake_case(tags_list):
+    
+    converted_list = []
+    
+    if tags_list:
+        
+        for tag in tags_list:
+            tag = tag.strip()
+            tag = tag.lower()
+            tag = tag.replace(' ', '_')
+            converted_list.append(tag)
+            
+        return converted_list
+    
+    else:
+        return None
 
 # POST Request    #Extend this API by calling the Classification Model
 class UploadArticleView(generics.CreateAPIView):
@@ -182,6 +216,51 @@ class UploadArticleView(generics.CreateAPIView):
 
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    
+    def classify_article(self, img_path):
+        # how to enter the venv before running this command???
+
+        command = f"/home/hassaan1/Desktop/ml_models/myenv/bin/python \"/home/hassaan1/Desktop/ml_models/Outfit Models/classification.py\" \"{img_path}\""    # add image path
+
+        try:
+            # Run the command in the shell
+            result = subprocess.run(command, shell=True, check=True, text=True, capture_output=True)
+            return result.stdout.split(',')   # returns list
+        except subprocess.CalledProcessError as e:
+            return f"Error: {e.stderr}"
+        
+    def set_article_tags(self, article, tags):
+        
+        if article.articleImage:
+                    
+            # tags = ['top', 'Tshirts', 'Men', 'firebrick', 'Summer', 'Sports', '/home/hassaan1/Desktop/red_shirt.jpg']
+
+            converted_tags = to_snake_case(tags)
+            current_article = get_object_or_404(ClothingArticle, id=article.id)
+            
+            # Add category of the article (maybe validate with serializer here)
+            current_article.category = converted_tags[0]
+            
+            # retrieve tags from DB
+            tag_names = {
+                "type": converted_tags[1],
+                "gender": converted_tags[2],
+                "color": converted_tags[3],
+                "season": converted_tags[4],
+                "occasion": converted_tags[5]
+            }
+
+            # Add the tags to the article (get_or_create avoids errors if tag doesn't exist)
+            for key, tag_name in tag_names.items():
+                tag, created = Tag.objects.get_or_create(tagName=tag_name)
+                article.tags_list.add(tag)
+            
+            current_article.save()
+            return True
+            
+        else:
+            return False
+        
 
     def post(self, request, *args, **kwargs):
 
@@ -189,12 +268,22 @@ class UploadArticleView(generics.CreateAPIView):
             data=request.data, context={"request": request}
         )  # explicity passing request in the context
         serializer.is_valid(raise_exception=True)
-        posts_list = serializer.save()
-
-        # Send message for each rejected image???
+        articles_list = serializer.save()
+        
+        # Article Classification & Tagging
+        
+        if articles_list:
+            
+            for article in articles_list:
+                
+                img_url = get_absolute_media_path(article.articleImage)
+                
+                if img_url:
+                    tags_list = self.classify_article(img_path=img_url)
+                    self.set_article_tags(article=article, tags=tags_list)
 
         return Response(
-            {"message": f"{len(posts_list)} Clothing Articles Added to Wardrobe"},
+            {"message": f"{len(articles_list)} Clothing Articles Added to Wardrobe. Tags: {tags_list}. Converted Tags: {to_snake_case(tags_list)}"},
             status=status.HTTP_201_CREATED,
         )
 
@@ -249,7 +338,7 @@ class ListArticleView(generics.ListAPIView):
 
         vaildated_category = category_serializer.validated_data.get("category")
         posts_list = ClothingArticle.objects.filter(
-            user=request.user,  # category=vaildated_category  # changing this temporarily for testing**************************
+            user=request.user, category=vaildated_category
         )
 
         list_serializer = ListArticleSerializer(
@@ -454,7 +543,7 @@ class TogglePostLikesView(APIView):
 
         # Like Post
 
-        current_post.likes.add(current_user)
+        current_post.likes.add(current_user)    # current_post.save()???
         return Response(
             {
                 "message": f"Post: {post_id} liked by User: {current_user.id} successfully"

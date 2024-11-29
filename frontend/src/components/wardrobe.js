@@ -45,19 +45,15 @@ export default function WardrobeSection() {
 
                     {/* Saved Article Section */}
                     <ArticlesGallery
-                        category={"tops"}
+                        category={"top"}
                     />
 
                     <ArticlesGallery
-                        category={"bottoms"}
+                        category={"bottom"}
                     />
 
                     <ArticlesGallery
-                        category={"footwear"}
-                    />
-
-                    <ArticlesGallery
-                        category={"accessories"}
+                        category={"foot"}
                     />
 
                 </div>

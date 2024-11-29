@@ -67,6 +67,9 @@ export default function UploadArticleModal({ closeUploadModal }) {
         };
     }, [imagePreviews]);
 
+    if (isLoading)
+        return(<p>Loading beep bop.....</p>)
+
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="bg-darkPurple rounded-lg shadow-lg w-11/12 sm:w-96 p-6 relative">
