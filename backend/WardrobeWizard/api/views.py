@@ -22,13 +22,14 @@ from .serializers import (
     PostIDSerializer,
     ListCommentSerializer,
     DeleteCommentSerializer,
+    OutfitGenerationSerializer,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from api.authentication import CookieJWTAuthentication
-import datetime
+import random
 import subprocess
 import os
 
@@ -550,3 +551,202 @@ class TogglePostLikesView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+class OutfitGenerationView(APIView):
+    
+    serializer_class = OutfitGenerationSerializer
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    
+    def put(self, request, *args, **kwargs):
+        
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        # Recommendation Model
+        
+        # Get the Theme, Season, Gender, Occasion from the request
+        theme = serializer.validated_data.get("theme")
+        # season = serializer.validated_data.get("season")
+        # gender = serializer.validated_data.get("gender")
+        occasion = serializer.validated_data.get("occasion")
+        
+        # Filter out the Tops that match this criteria        
+        
+        blue_theme = ["cadetblue", "steelblue", "lightsteelblue", "lightblue", "powderblue", "lightskyblue", "skyblue", "cornflowerblue", "deepskyblue", "dodgerblue", "royalblue", "blue", "mediumblue", "darkblue", "navy", "midnightblue"]
+
+        cyan_theme = ["cyan", "lightcyan", "paleturquoise", "aquamarine", "turquoise", "mediumturquoise", "darkturquoise"]
+
+        green_theme = ["greenyellow", "chartreuse", "lawngreen", "lime", "limegreen", "palegreen", "lightgreen", "mediumspringgreen", "springgreen", "mediumseagreen", "seagreen", "forestgreen", "green", "darkgreen", "yellowgreen", "olivedrab", "darkolivegreen", "mediumaquamarine", "darkseagreen", "lightseagreen", "darkcyan", "teal"]
+
+        red_theme = ["lightsalmon", "salmon", "darksalmon", "lightcoral", "indianred", "crimson", "red", "firebrick", "darkred"]
+
+        yellow_theme = ["gold", "yellow", "lightyellow", "lemonchiffon", "lightgoldenrodyellow", "papayawhip", "moccasin", "peachpuff", "palegoldenrod", "khaki", "darkkhaki"]
+
+        orange_theme = ["orange", "darkorange", "coral", "tomato", "orangered"]
+
+        purple_theme = ["lavender", "thistle", "plum", "orchid", "violet", "magenta", "mediumorchid", "darkorchid", "darkviolet", "blueviolet", "darkmagenta", "purple", "mediumpurple", "mediumslateblue", "slateblue", "darkslateblue", "indigo"]
+
+        pink_theme = ["pink", "lightpink", "hotpink", "deeppink", "palevioletred", "mediumvioletred"]
+
+        brown_theme = ["cornsilk", "blanchedalmond", "bisque", "navajowhite", "wheat", "burlywood", "tan", "rosybrown", "sandybrown", "goldenrod", "darkgoldenrod", "peru", "chocolate", "olive", "saddlebrown", "sienna", "brown", "maroon"]
+
+        white_theme = ["white", "snow", "honeydew", "mintcream", "azure", "aliceblue", "ghostwhite", "whitesmoke", "seashell", "beige", "oldlace", "floralwhite", "ivory", "antiquewhite", "linen", "lavenderblush", "mistyrose"]
+
+        grey_theme = ["gainsboro", "lightgray", "silver", "darkgray", "dimgray", "gray", "lightslategray", "slategray", "darkslategray"]
+
+        black_theme = ['black']
+        
+        if theme == 'blue':
+            matching_colors = Tag.objects.filter(tagName__in=blue_theme)
+            matching_tops = ClothingArticle.objects.filter(category='top', tags_list__in=matching_colors).distinct()
+        if theme == 'cyan':
+            matching_colors = Tag.objects.filter(tagName__in=cyan_theme)
+            matching_tops = ClothingArticle.objects.filter(category='top', tags_list__in=matching_colors).distinct()
+        if theme == 'green':
+            matching_colors = Tag.objects.filter(tagName__in=green_theme)
+            matching_tops = ClothingArticle.objects.filter(category='top', tags_list__in=matching_colors).distinct()
+        if theme == 'red':
+            matching_colors = Tag.objects.filter(tagName__in=red_theme)
+            matching_tops = ClothingArticle.objects.filter(category='top', tags_list__in=matching_colors).distinct()
+        if theme == 'yellow':
+            matching_colors = Tag.objects.filter(tagName__in=yellow_theme)
+            matching_tops = ClothingArticle.objects.filter(category='top', tags_list__in=matching_colors).distinct()
+        if theme == 'orange':
+            matching_colors = Tag.objects.filter(tagName__in=orange_theme)
+            matching_tops = ClothingArticle.objects.filter(category='top', tags_list__in=matching_colors).distinct()
+        if theme == 'purple':
+            matching_colors = Tag.objects.filter(tagName__in=purple_theme)
+            matching_tops = ClothingArticle.objects.filter(category='top', tags_list__in=matching_colors).distinct()
+        if theme == 'pink':
+            matching_colors = Tag.objects.filter(tagName__in=pink_theme)
+            matching_tops = ClothingArticle.objects.filter(category='top', tags_list__in=matching_colors).distinct()
+        if theme == 'brown':
+            matching_colors = Tag.objects.filter(tagName__in=brown_theme)
+            matching_tops = ClothingArticle.objects.filter(category='top', tags_list__in=matching_colors).distinct()
+        if theme == 'white':
+            matching_colors = Tag.objects.filter(tagName__in=white_theme)
+            matching_tops = ClothingArticle.objects.filter(category='top', tags_list__in=matching_colors).distinct()
+        if theme == 'grey':
+            matching_colors = Tag.objects.filter(tagName__in=grey_theme)
+            matching_tops = ClothingArticle.objects.filter(category='top', tags_list__in=matching_colors).distinct()
+        if theme == 'black':
+            matching_colors = Tag.objects.filter(tagName__in=black_theme)
+            matching_tops = ClothingArticle.objects.filter(category='top', tags_list__in=matching_colors).distinct()
+            
+        
+        # Choose between Formal & Causal Outfit
+        
+        formal_tags = ['ethnic', 'formal']
+        casual_tags = ['casual', 'party', 'smart_casual', 'sports','travel']
+        
+        if (occasion == "formal"):
+            season_tags = Tag.objects.filter(tagName__in=formal_tags)
+            matching_tops = matching_tops.filter(tags_list__in=season_tags).distinct()
+        else:
+            season_tags = Tag.objects.filter(tagName__in=casual_tags)
+            matching_tops = matching_tops.filter(tags_list__in=season_tags).distinct()
+        
+        if len(matching_tops) <= 0:
+            return Response(
+                {"No Matching Articles Found In Your Wardrobe. Please Add New Clothing Articles."}, status=status.HTTP_404_NOT_FOUND
+            )
+            
+        # Randomly choose a top from the filtered items
+        random.seed()
+        random_index = random.randint(0, len(matching_tops) - 1)
+        
+        chosen_clothes = []
+        chosen_top = matching_tops[random_index]
+        chosen_clothes.append(chosen_top)
+        
+        
+        # Define the matchings for tops & bottoms
+        
+        white_black = white_theme + black_theme
+        white_black_blue = white_theme + black_theme + blue_theme
+        white_grey_black = white_theme + grey_theme + black_theme
+        white_grey_black_blue = white_theme + grey_theme + black_theme + blue_theme
+        blue_brown_white_black = blue_theme + brown_theme + white_theme + black_theme
+        white_grey_black_blue_green_red_brown = white_theme + grey_theme + black_theme + blue_theme + green_theme + red_theme + brown_theme
+        
+        if theme == 'blue':
+            # blue, brown, white, black (2)
+            matching_colors_bottoms = Tag.objects.filter(tagName__in=blue_brown_white_black)
+            matching_bottoms = ClothingArticle.objects.filter(category='bottom', tags_list__in=matching_colors_bottoms).distinct()
+            
+        if theme == 'cyan':
+            # white, black (6)
+            matching_colors_bottoms = Tag.objects.filter(tagName__in=white_black)
+            matching_bottoms = ClothingArticle.objects.filter(category='bottom', tags_list__in=matching_colors_bottoms).distinct()
+            
+        if theme == 'green' or theme == 'purple':
+            # white, grey, black (3)
+            matching_colors_bottoms = Tag.objects.filter(tagName__in=white_grey_black)
+            matching_bottoms = ClothingArticle.objects.filter(category='bottom', tags_list__in=matching_colors_bottoms).distinct()
+            
+        if theme == 'red' or theme == 'yellow' or theme == 'orange' or theme == 'pink' or theme == 'grey' or theme == 'black':
+            # white, grey, black, blue (1)
+            matching_colors_bottoms = Tag.objects.filter(tagName__in=white_grey_black_blue)
+            matching_bottoms = ClothingArticle.objects.filter(category='bottom', tags_list__in=matching_colors_bottoms).distinct()
+            
+        if theme == 'brown':
+            # white, black, blue (4)
+            matching_colors_bottoms = Tag.objects.filter(tagName__in=white_black_blue)
+            matching_bottoms = ClothingArticle.objects.filter(category='bottom', tags_list__in=matching_colors_bottoms).distinct()
+            
+        if theme == 'white':
+            # white, grey, black, blue, green, red, brown (5)
+            matching_colors_bottoms = Tag.objects.filter(tagName__in=white_grey_black_blue_green_red_brown)
+            matching_bottoms = ClothingArticle.objects.filter(category='bottom', tags_list__in=matching_colors_bottoms).distinct()
+            
+        
+        # Choose bottoms between formal & casual
+        # matching_bottoms = matching_bottoms.filter(tags_list__in=season_tags).distinct()
+        
+        if len(matching_bottoms) <= 0:
+            return Response(
+                {"No Matching Articles Found In Your Wardrobe. Please Add New Clothing Articles."}, status=status.HTTP_404_NOT_FOUND
+            )
+            
+        # Randomly choose a top from the filtered items
+        random.seed()
+        random_index = random.randint(0, len(matching_bottoms) - 1)
+        
+        chosen_bottoms = matching_bottoms[random_index]
+        chosen_clothes.append(chosen_bottoms)
+        
+        # Define the matchings for tops & bottoms & shoes
+        
+        matching_colors_footwear = Tag.objects.filter(tagName__in=white_grey_black_blue)
+        matching_footwear = ClothingArticle.objects.filter(category='foot', tags_list__in=matching_colors_footwear).distinct()
+        
+        if len(matching_footwear) <= 0:
+            return Response(
+                {"No Matching Articles Found In Your Wardrobe. Please Add New Clothing Articles."}, status=status.HTTP_404_NOT_FOUND
+            )
+            
+        # Select footwear appropriate for the selected top & bottom
+        random.seed()
+        random_index = random.randint(0, len(matching_footwear) - 1)
+        
+        chosen_footwear = matching_footwear[random_index]
+        chosen_clothes.append(chosen_footwear)
+        
+        final_outfit = ListArticleSerializer(
+            chosen_clothes, many=True, context={"request": request}
+        )
+        
+        # Add null checks for all 3 articles and send error if even one is unavailable or generate a fall back outfit
+        
+        return Response(
+                        {"img_top": "http://127.0.0.1:8000/media/post_images/4/b5183714-c623-433c-9d28-5fb3b1a743b5.png", 
+                         "img_bottom": "http://127.0.0.1:8000/media/post_images/4/b5183714-c623-433c-9d28-5fb3b1a743b5.png", 
+                         "img_footwear": "http://127.0.0.1:8000/media/post_images/4/b5183714-c623-433c-9d28-5fb3b1a743b5.png",
+                         "chosen_top": final_outfit.data[0],
+                         "chosen_bottom": final_outfit.data[1],
+                         "chosen_footwear": final_outfit.data[2],
+                        
+                        }, 
+                        status=status.HTTP_200_OK
+                    )

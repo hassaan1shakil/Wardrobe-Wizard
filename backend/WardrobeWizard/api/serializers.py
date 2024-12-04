@@ -380,3 +380,43 @@ class DeleteCommentSerializer(serializers.Serializer):
             raise serializers.ValidationError("Comment Not Found")
         
         return comment_id
+    
+
+class OutfitGenerationSerializer(serializers.Serializer):
+    
+    theme = serializers.CharField(required=True)
+    # season = serializers.CharField(required=True)
+    # gender = serializers.CharField(required=True)
+    occasion = serializers.CharField(required=True)
+    # article_type = serializers.CharField(required=True)
+    
+    def validate(self, data):
+        
+        theme = data.get("theme")
+        # season = data.get("season")
+        # gender = data.get("gender")
+        occasion = data.get("occasion")
+        # article_type = data.get("type")
+        
+        # all these will have to be in lowercase to be checked against the DB
+        theme_list = ['pink', 'purple', 'red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'brown', 'white', 'black', 'grey']
+        # season_list = ['fall', 'spring', 'summer', 'winter']
+        # gender_list = ['boys', 'girls', 'men', 'unisex', 'women']
+        occasion_list = ['casual', 'formal']
+        
+        if theme not in theme_list:
+            serializers.ValidationError("Invalid Theme")
+        
+        # if season not in season_list:
+        #     serializers.ValidationError("Invalid Season")
+            
+        # if gender not in gender_list:
+        #     serializers.ValidationError("Invalid Gender")
+            
+        if occasion not in occasion_list:
+            serializers.ValidationError("Invalid Occasion")
+            
+        # if article_type not in article_type_list:
+        #     serializers.ValidationError("Invalid Type")
+        
+        return data
