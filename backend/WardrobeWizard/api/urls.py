@@ -1,6 +1,6 @@
 
 from django.urls import path
-from api.views import UserSignupView, LoginView, GetUserInfo, UpdateUserInforView, UpdatePasswordView, DeleteUserView, UploadArticleView, DeleteArticleView, ListArticleView, ListPostView, CreatePostView, DeletePostView, CreateCommentView, ListCommentView, DeleteCommentView, TogglePostLikesView
+from api.views import UserSignupView, LoginView, GetUserInfo, UpdateUserInforView, UpdatePasswordView, DeleteUserView, UploadArticleView, DeleteArticleView, ListArticleView, ListPostView, CreatePostView, DeletePostView, CreateCommentView, ListCommentView, DeleteCommentView, TogglePostLikesView, OutfitGenerationView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView 
 
 urlpatterns = [
@@ -22,4 +22,5 @@ urlpatterns = [
     path("list-comments/", ListCommentView.as_view(), name="list_comments"),
     path("delete-comment/", DeleteCommentView.as_view(), name="delete_comment"),
     path("toggle-like/", TogglePostLikesView.as_view(), name="toggle-like"),
+    path("generate-outfit/", OutfitGenerationView.as_view(), name="generate-outfit"),
 ]

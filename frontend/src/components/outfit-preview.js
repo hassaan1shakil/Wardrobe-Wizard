@@ -29,25 +29,19 @@ export default function OutfitPreview({ previewImages }) {
         <>
             <div className="fixed bottom-[16rem] left-[11rem]">
 
-                {renderOutfitImage(previewImages.img_top, "Image-Top")}
+                {renderOutfitImage(previewImages.img_top.articleImage, "Image-Top")}
 
             </div>
 
             <div className="fixed bottom-[9rem] left-[26rem]">
 
-                {renderOutfitImage(previewImages.img_bottom, "Image-Bottom")}
+                {renderOutfitImage(previewImages.img_bottom.articleImage, "Image-Bottom")}
 
             </div>
 
             <div className="fixed bottom-[9rem] right-[26rem]">
 
-                {renderOutfitImage(previewImages.img_footwear, "Image-Footwear")}
-
-            </div>
-
-            <div className="fixed bottom-[16rem] right-[11rem]">
-
-                {renderOutfitImage(previewImages.img_accessory, "Image-Accessory")}
+                {renderOutfitImage(previewImages.img_footwear.articleImage, "Image-Footwear")}
 
             </div>
         </>
